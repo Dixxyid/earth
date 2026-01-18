@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu AR Astronomi</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #0f172a;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h2 { margin-bottom: 30px; }
+
+        .menu-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 80%;
+            max-width: 400px;
+        }
+
+        .tab-button {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            border-radius: 15px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: transform 0.2s;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+
+        .tab-button:active {
+            transform: scale(0.95);
+        }
+
+        /* Warna khusus untuk Bumi */
+        .earth {
+            background-color: #20aaee;
+        }
+
+        /* Warna khusus untuk Matahari */
+        .sun {
+            background-color: #ff9800;
+        }
+
+        .icon {
+            font-size: 2rem;
+            margin-right: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Pilih Materi Augmented Reality</h2>
+
+    <div class="menu-container">
+        <a href="earth.html" class="tab-button earth">
+            <span class="icon">🌍</span>
+            <span>EARTH</span>
+        </a>
+
+        <a href="moon.html" class="tab-button moon">
+            <span class="icon">🌙</span>
+            <span>MOON</span>
+        </a>
+
+        <a href="sun.html" class="tab-button sun">
+            <span class="icon">☀️</span>
+            <span>SUN</span>
+        </a>
+    </div>
+
+</body>
+</html>
