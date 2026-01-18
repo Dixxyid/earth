@@ -7,73 +7,90 @@
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     
     <style>
+        body { margin: 0; overflow: hidden; }
         .back-btn {
             position: fixed; top: 1rem; left: 1rem;
             background-color: #20aaee; color: white;
             padding: 0.8rem 1.2rem; border-radius: 0.5rem;
-            text-decoration: none; font-family: Arial, sans-serif;
+            text-decoration: none; font-family: sans-serif;
             z-index: 1000; font-weight: bold;
         }
-        #UI {
+        #UI-Container {
             position: fixed; bottom: 2rem; left: 50%;
             transform: translateX(-50%);
-            color: white; background: rgba(0, 0, 0, 0.8);
-            padding: 15px 25px; z-index: 1000; 
-            border-radius: 50px; font-family: sans-serif;
-            text-align: center; min-width: 250px;
-            border: 2px solid #20aaee;
+            display: flex; flex-direction: column; align-items: center;
+            gap: 10px; z-index: 1000; width: 80%;
+        }
+        #Status {
+            color: white; background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px; border-radius: 20px;
+            font-family: sans-serif; text-align: center;
+            border: 1px solid #20aaee;
+        }
+        #LockBtn {
+            display: none; /* Muncul hanya saat marker terdeteksi */
+            background-color: #28a745; color: white;
+            border: none; padding: 15px 30px;
+            border-radius: 10px; font-weight: bold;
+            font-size: 1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
     </style>
 
     <script>
-        AFRAME.registerComponent('freeze-location', {
+        let isLocked = false;
+
+        AFRAME.registerComponent('ar-controller', {
             init: function () {
-                const el = this.el; 
-                const ui = document.querySelector('#UI');
+                const el = this.el; // Model Bumi
+                const statusText = document.querySelector('#Status');
+                const lockBtn = document.querySelector('#LockBtn');
                 const targetEntity = document.querySelector('[mindar-image-target]');
-                let isFrozen = false;
 
+                // 1. Saat Marker Terdeteksi
                 targetEntity.addEventListener("targetFound", () => {
-                    if (isFrozen) return;
-                    
-                    ui.innerHTML = "✅ Marker Ditemukan! Mengunci...";
-                    ui.style.backgroundColor = "#28a745";
-
-                    // Jeda 1.5 detik agar posisi tracking benar-benar stabil
-                    setTimeout(() => {
-                        const worldPos = new THREE.Vector3();
-                        const worldQuat = new THREE.Quaternion();
-                        const worldScale = new THREE.Vector3();
-
-                        // 1. Ambil posisi dunia nyata
-                        el.object3D.getWorldPosition(worldPos);
-                        el.object3D.getWorldQuaternion(worldQuat);
-                        el.object3D.getWorldScale(worldScale);
-
-                        // 2. Pindahkan objek ke root scene
-                        el.sceneEl.appendChild(el);
-
-                        // 3. Terapkan kembali transformasi
-                        el.object3D.position.copy(worldPos);
-                        el.object3D.quaternion.copy(worldQuat);
-                        el.object3D.scale.copy(worldScale);
-
-                        // 4. PERBAIKAN KRUSIAL: Paksa visible tetap true setiap frame
-                        isFrozen = true;
-                        el.setAttribute('visible', 'true');
-                        
-                        // Hentikan MindAR dari mengontrol visibilitas objek ini
-                        el.removeAttribute('mindar-image-target'); 
-
-                        ui.innerHTML = "🚀 Objek Terkunci! Lepaskan Kartu.";
-                    }, 1500);
+                    if (!isLocked) {
+                        statusText.innerHTML = "✅ Marker Terdeteksi";
+                        lockBtn.style.display = "block";
+                    }
                 });
-            },
-            // Paksa objek tetap terlihat jika MindAR mencoba menyembunyikannya
-            tick: function() {
-                if (this.isFrozen && !this.el.getAttribute('visible')) {
-                    this.el.setAttribute('visible', 'true');
-                }
+
+                // 2. Saat Marker Hilang (sebelum dikunci)
+                targetEntity.addEventListener("targetLost", () => {
+                    if (!isLocked) {
+                        statusText.innerHTML = "🔍 Mencari Marker...";
+                        lockBtn.style.display = "none";
+                    }
+                });
+
+                // 3. Logika Penguncian (Tombol di klik)
+                window.lockObject = () => {
+                    if (isLocked) return;
+
+                    const worldPos = new THREE.Vector3();
+                    const worldQuat = new THREE.Quaternion();
+                    const worldScale = new THREE.Vector3();
+
+                    // Ambil koordinat nyata saat ini
+                    el.object3D.getWorldPosition(worldPos);
+                    el.object3D.getWorldQuaternion(worldQuat);
+                    el.object3D.getWorldScale(worldScale);
+
+                    // Pindahkan ke Scene utama (Bebas dari Marker)
+                    el.sceneEl.appendChild(el);
+
+                    // Terapkan koordinat dunia nyata
+                    el.object3D.position.copy(worldPos);
+                    el.object3D.quaternion.copy(worldQuat);
+                    el.object3D.scale.copy(worldScale);
+
+                    // Matikan fungsi tracking pada entity target agar hemat baterai
+                    targetEntity.setAttribute("mindar-image-target", "enabled: false");
+
+                    isLocked = true;
+                    statusText.innerHTML = "🚀 OBJEK TERKUNCI DI DUNIA NYATA";
+                    statusText.style.borderColor = "#28a745";
+                    lockBtn.style.display = "none";
+                };
             }
         });
     </script>
@@ -92,26 +109,31 @@
             <a-asset-item id="model1" src="assets/model1/model1.glb"></a-asset-item>
         </a-assets>
 
-        <a-light type="ambient" intensity="1.5"></a-light>
-        <a-light type="directional" position="0 10 5" intensity="1"></a-light>
-
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
+        <a-light type="ambient" intensity="1.2"></a-light>
+        <a-light type="directional" position="0 10 5" intensity="0.8"></a-light>
+
         <a-entity mindar-image-target="targetIndex: 0">
+            <a-plane src="#card1" position="0 0 0" height="0.5" width="0.5" rotation="0 0 0" opacity="0.3"></a-plane>
+
             <a-gltf-model 
                 id="earthModel"
                 src="#model1" 
-                position="0 0 0" 
-                rotation="0 0 0" 
-                scale="0.5 0.5 0.5" 
+                position="0 0 0.1" 
+                scale="0.08 0.08 0.08" 
                 animation-mixer
-                freeze-location>
+                ar-controller>
             </a-gltf-model>
         </a-entity>
 
     </a-scene>
 
     <a href="dashboard.html" class="back-btn">Back</a>
-    <div id="UI">🔍 Cari Marker di Kartu...</div>
+
+    <div id="UI-Container">
+        <div id="Status">🔍 Arahkan Kamera ke Kartu...</div>
+        <button id="LockBtn" onclick="lockObject()">KUNCI POSISI DI SINI</button>
+    </div>
 </body>
 </html>
