@@ -21,95 +21,81 @@
             padding: 12px 25px; border-radius: 30px;
             font-family: sans-serif; text-align: center;
             border: 2px solid #20aaee; z-index: 1000;
+            pointer-events: none;
         }
     </style>
 
     <script>
-        AFRAME.registerComponent('gesture-handler', {
-            schema: {
-                enabled: {default: true},
-                rotationFactor: {default: 0.5},
-                minScale: {default: 0.1},
-                maxScale: {default: 3}
-            },
+        AFRAME.registerComponent('interactive-logic', {
             init: function () {
-                this.handleScale = this.handleScale.bind(this);
-                this.handleRotation = this.handleRotation.bind(this);
+                const el = this.el;
+                const status = document.querySelector('#Status-Notif');
                 this.isVisible = false;
-                this.touchStart = null;
+                this.isAutoRotating = true;
 
-                // Listener untuk interaksi sentuh
+                // 1. Logika Muncul (Smooth Appear)
+                this.el.parentNode.addEventListener("targetFound", () => {
+                    this.isVisible = true;
+                    status.innerHTML = "Objek Terdeteksi";
+                    status.style.borderColor = "#28a745";
+                    
+                    el.setAttribute('animation__scale', {
+                        property: 'scale',
+                        from: '0 0 0',
+                        to: '0.5 0.5 0.5',
+                        dur: 1000,
+                        easing: 'easeOutBack'
+                    });
+                });
+
+                this.el.parentNode.addEventListener("targetLost", () => {
+                    this.isVisible = false;
+                    status.innerHTML = "🔍 Scan Markers ...";
+                    status.style.borderColor = "#20aaee";
+                });
+
+                // 2. Logika Sentuhan (Gesture)
                 this.el.sceneEl.addEventListener('touchstart', (e) => {
+                    if (!this.isVisible) return;
                     this.touchStart = e.touches;
+
+                    // HENTIKAN AUTO ROTATE PERMANEN SAAT DISENTUH
+                    if (this.isAutoRotating) {
+                        el.removeAttribute('animation__autorotate');
+                        this.isAutoRotating = false;
+                    }
                 });
 
                 this.el.sceneEl.addEventListener('touchmove', (e) => {
                     if (!this.isVisible || !this.touchStart) return;
-                    
+
                     if (e.touches.length === 1) {
-                        this.handleRotation(e);
+                        // GESTUR GESER (ROTASI)
+                        const deltaX = e.touches[0].pageX - this.touchStart[0].pageX;
+                        const deltaY = e.touches[0].pageY - this.touchStart[0].pageY;
+                        
+                        el.object3D.rotation.y += deltaX * 0.01;
+                        el.object3D.rotation.x += deltaY * 0.01;
+                        
+                        this.touchStart = e.touches;
                     } else if (e.touches.length === 2) {
-                        this.handleScale(e);
+                        // GESTUR CUBIT (ZOOM)
+                        const touch1 = e.touches[0];
+                        const touch2 = e.touches[1];
+                        const dist = Math.hypot(touch1.pageX - touch2.pageX, touch1.pageY - touch2.pageY);
+                        
+                        if (this.lastDist) {
+                            const ratio = dist / this.lastDist;
+                            let newScale = el.object3D.scale.x * ratio;
+                            newScale = Math.min(Math.max(newScale, 0.1), 2.5); // Batas zoom
+                            el.object3D.scale.set(newScale, newScale, newScale);
+                        }
+                        this.lastDist = dist;
                     }
                 });
 
                 this.el.sceneEl.addEventListener('touchend', () => {
                     this.lastDist = null;
-                });
-                
-                // Cek apakah marker terdeteksi
-                this.el.parentNode.addEventListener("targetFound", () => { 
-                    this.isVisible = true; 
-                    // Reset scale saat ketemu untuk memicu animasi
-                    this.el.setAttribute('scale', '0 0 0');
-                    this.el.setAttribute('animation__scale', {
-                        property: 'scale',
-                        from: '0 0 0',
-                        to: '0.5 0.5 0.5',
-                        dur: 1200,
-                        easing: 'easeOutBack'
-                    });
-                });
-                this.el.parentNode.addEventListener("targetLost", () => { this.isVisible = false; });
-            },
-
-            handleRotation: function (e) {
-                const deltaX = e.touches[0].pageX - this.touchStart[0].pageX;
-                // Menggerakkan rotasi lokal model
-                this.el.object3D.rotation.y += deltaX * 0.01;
-                this.touchStart = e.touches;
-            },
-
-            handleScale: function (e) {
-                const touch1 = e.touches[0];
-                const touch2 = e.touches[1];
-                const dist = Math.hypot(touch1.pageX - touch2.pageX, touch1.pageY - touch2.pageY);
-                
-                if (!this.lastDist) {
-                    this.lastDist = dist;
-                    return;
-                }
-
-                const ratio = dist / this.lastDist;
-                let newScale = this.el.object3D.scale.x * ratio;
-                newScale = Math.min(Math.max(newScale, this.data.minScale), this.data.maxScale);
-                
-                this.el.object3D.scale.set(newScale, newScale, newScale);
-                this.lastDist = dist;
-            }
-        });
-
-        // Update teks status
-        AFRAME.registerComponent('status-manager', {
-            init: function () {
-                const status = document.querySelector('#Status-Notif');
-                this.el.addEventListener("targetFound", () => {
-                    status.innerHTML = "✅ Objek Ditampilkan";
-                    status.style.borderColor = "#28a745";
-                });
-                this.el.addEventListener("targetLost", () => {
-                    status.innerHTML = "🔍 Scan Markers ...";
-                    status.style.borderColor = "#20aaee";
                 });
             }
         });
@@ -118,7 +104,7 @@
 
 <body>
     <a-scene 
-        mindar-image="imageTargetSrc: ./markers/targets.mind; autoStart: true; maxTrack: 1; filterMinCF: 0.0001; filterBeta: 0.005; missTolerance: 5;" 
+        mindar-image="imageTargetSrc: ./markers/targets.mind; autoStart: true; maxTrack: 1; filterMinCF: 0.0001; filterBeta: 0.005;" 
         renderer="colorManagement: true, physicallyCorrectLights: true"
         vr-mode-ui="enabled: false"
         device-orientation-permission-ui="enabled: false">
@@ -132,23 +118,21 @@
         <a-light type="ambient" intensity="1.2"></a-light>
         <a-light type="directional" position="0 10 5" intensity="1"></a-light>
 
-        <a-entity mindar-image-target="targetIndex: 0" status-manager>
-            
+        <a-entity mindar-image-target="targetIndex: 0">
             <a-gltf-model 
                 id="earthModel"
                 src="#modelEarth" 
-                position="0 0 0.1" 
+                position="0 0 0" 
                 scale="0 0 0" 
                 animation-mixer
-                gesture-handler
-                animation__autorotate="property: rotation; from: 0 0 0; to: 0 360 0; loop: true; dur: 30000; easing: linear; pauseEvents: touchstart; resumeEvents: touchend">
+                interactive-logic
+                animation__autorotate="property: rotation; to: 0 360 0; loop: true; dur: 20000; easing: linear">
             </a-gltf-model>
-
         </a-entity>
 
     </a-scene>
 
-    <div id="Status-Notif">🔍 Scan Markers 2 ...</div>
+    <div id="Status-Notif">🔍 Scan Markers 3 ...</div>
     <a href="dashboard.html" class="back-btn">Back</a>
 </body>
 </html>
