@@ -59,6 +59,7 @@ h1 {
 .learning {
     background-color: #e6ba39; 
     color: white;
+}
 
 .quiz {
     background-color: #913df2;
@@ -85,5 +86,6 @@ h1 {
     transform: translateY(1px);
     box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
 }
+
 
 
