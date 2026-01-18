@@ -27,6 +27,7 @@
     <script>
         AFRAME.registerComponent('gesture-handler', {
             schema: {
+                enabled: {default: true},
                 rotationFactor: {default: 0.5},
                 minScale: {default: 0.1},
                 maxScale: {default: 3}
@@ -35,13 +36,15 @@
                 this.handleScale = this.handleScale.bind(this);
                 this.handleRotation = this.handleRotation.bind(this);
                 this.isVisible = false;
+                this.touchStart = null;
 
+                // Listener untuk interaksi sentuh
                 this.el.sceneEl.addEventListener('touchstart', (e) => {
                     this.touchStart = e.touches;
                 });
 
                 this.el.sceneEl.addEventListener('touchmove', (e) => {
-                    if (!this.isVisible) return;
+                    if (!this.isVisible || !this.touchStart) return;
                     
                     if (e.touches.length === 1) {
                         this.handleRotation(e);
@@ -50,24 +53,30 @@
                     }
                 });
 
-                // Reset jarak cubit saat jari diangkat
                 this.el.sceneEl.addEventListener('touchend', () => {
                     this.lastDist = null;
                 });
                 
-                this.el.parentNode.addEventListener("targetFound", () => { this.isVisible = true; });
+                // Cek apakah marker terdeteksi
+                this.el.parentNode.addEventListener("targetFound", () => { 
+                    this.isVisible = true; 
+                    // Reset scale saat ketemu untuk memicu animasi
+                    this.el.setAttribute('scale', '0 0 0');
+                    this.el.setAttribute('animation__scale', {
+                        property: 'scale',
+                        from: '0 0 0',
+                        to: '0.5 0.5 0.5',
+                        dur: 1200,
+                        easing: 'easeOutBack'
+                    });
+                });
                 this.el.parentNode.addEventListener("targetLost", () => { this.isVisible = false; });
             },
 
             handleRotation: function (e) {
                 const deltaX = e.touches[0].pageX - this.touchStart[0].pageX;
-                const deltaY = e.touches[0].pageY - this.touchStart[0].pageY;
-
-                // Rotasi Y (Kiri-Kanan)
+                // Menggerakkan rotasi lokal model
                 this.el.object3D.rotation.y += deltaX * 0.01;
-                // Rotasi X (Atas-Bawah) - Opsional jika ingin lebih bebas
-                this.el.object3D.rotation.x += deltaY * 0.01;
-
                 this.touchStart = e.touches;
             },
 
@@ -90,25 +99,15 @@
             }
         });
 
-        AFRAME.registerComponent('smooth-appear', {
+        // Update teks status
+        AFRAME.registerComponent('status-manager', {
             init: function () {
-                const el = this.el;
                 const status = document.querySelector('#Status-Notif');
-
-                this.el.parentNode.addEventListener("targetFound", () => {
-                    status.innerHTML = "Objek Ditampilkan";
+                this.el.addEventListener("targetFound", () => {
+                    status.innerHTML = "✅ Objek Ditampilkan";
                     status.style.borderColor = "#28a745";
-                    
-                    el.setAttribute('animation__scale', {
-                        property: 'scale',
-                        from: '0 0 0',
-                        to: '0.5 0.5 0.5',
-                        dur: 1200,
-                        easing: 'easeOutBack'
-                    });
                 });
-
-                this.el.parentNode.addEventListener("targetLost", () => {
+                this.el.addEventListener("targetLost", () => {
                     status.innerHTML = "🔍 Scan Markers ...";
                     status.style.borderColor = "#20aaee";
                 });
@@ -133,27 +132,23 @@
         <a-light type="ambient" intensity="1.2"></a-light>
         <a-light type="directional" position="0 10 5" intensity="1"></a-light>
 
-        <a-entity mindar-image-target="targetIndex: 0">
-            <a-entity 
-                animation="property: rotation; to: 0 360 0; loop: true; dur: 30000; easing: linear">
-                
-                <a-gltf-model 
-                    id="earthModel"
-                    src="#modelEarth" 
-                    position="0 0 0.1" 
-                    scale="0 0 0" 
-                    animation-mixer
-                    smooth-appear
-                    gesture-handler>
-                </a-gltf-model>
+        <a-entity mindar-image-target="targetIndex: 0" status-manager>
+            
+            <a-gltf-model 
+                id="earthModel"
+                src="#modelEarth" 
+                position="0 0 0.1" 
+                scale="0 0 0" 
+                animation-mixer
+                gesture-handler
+                animation__autorotate="property: rotation; from: 0 0 0; to: 0 360 0; loop: true; dur: 30000; easing: linear; pauseEvents: touchstart; resumeEvents: touchend">
+            </a-gltf-model>
 
-            </a-entity>
         </a-entity>
 
     </a-scene>
 
-    <div id="Status-Notif">🔍 Scan Markers 1 ...</div>
+    <div id="Status-Notif">🔍 Scan Markers 2 ...</div>
     <a href="dashboard.html" class="back-btn">Back</a>
 </body>
 </html>
-
