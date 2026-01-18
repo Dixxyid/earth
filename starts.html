@@ -31,9 +31,8 @@
                 const el = this.el;
                 const status = document.querySelector('#Status-Notif');
                 this.isVisible = false;
-                this.isAutoRotating = true;
 
-                // 1. Logika Muncul (Smooth Appear)
+                // 1. Muncul perlahan saat marker terdeteksi
                 this.el.parentNode.addEventListener("targetFound", () => {
                     this.isVisible = true;
                     status.innerHTML = "Objek Terdeteksi";
@@ -59,18 +58,15 @@
                     if (!this.isVisible) return;
                     this.touchStart = e.touches;
 
-                    // HENTIKAN AUTO ROTATE PERMANEN SAAT DISENTUH
-                    if (this.isAutoRotating) {
-                        el.removeAttribute('animation__autorotate');
-                        this.isAutoRotating = false;
-                    }
+                    // PAUSE rotasi otomatis saat disentuh
+                    el.components.animation__autorotate.pause();
                 });
 
                 this.el.sceneEl.addEventListener('touchmove', (e) => {
                     if (!this.isVisible || !this.touchStart) return;
 
                     if (e.touches.length === 1) {
-                        // GESTUR GESER (ROTASI)
+                        // ROTASI MANUAL
                         const deltaX = e.touches[0].pageX - this.touchStart[0].pageX;
                         const deltaY = e.touches[0].pageY - this.touchStart[0].pageY;
                         
@@ -79,7 +75,7 @@
                         
                         this.touchStart = e.touches;
                     } else if (e.touches.length === 2) {
-                        // GESTUR CUBIT (ZOOM)
+                        // ZOOM
                         const touch1 = e.touches[0];
                         const touch2 = e.touches[1];
                         const dist = Math.hypot(touch1.pageX - touch2.pageX, touch1.pageY - touch2.pageY);
@@ -87,7 +83,7 @@
                         if (this.lastDist) {
                             const ratio = dist / this.lastDist;
                             let newScale = el.object3D.scale.x * ratio;
-                            newScale = Math.min(Math.max(newScale, 0.1), 2.5); // Batas zoom
+                            newScale = Math.min(Math.max(newScale, 0.1), 2.5);
                             el.object3D.scale.set(newScale, newScale, newScale);
                         }
                         this.lastDist = dist;
@@ -96,6 +92,16 @@
 
                 this.el.sceneEl.addEventListener('touchend', () => {
                     this.lastDist = null;
+                    if (!this.isVisible) return;
+
+                    // RESUME rotasi otomatis dari koordinat terakhir saat jari dilepas
+                    // Kita update nilai "from" agar tidak melompat ke posisi awal
+                    const currentRot = el.getAttribute('rotation');
+                    el.setAttribute('animation__autorotate', {
+                        from: `${currentRot.x} ${currentRot.y} ${currentRot.z}`,
+                        to: `${currentRot.x} ${currentRot.y + 360} ${currentRot.z}`
+                    });
+                    el.components.animation__autorotate.play();
                 });
             }
         });
@@ -126,13 +132,13 @@
                 scale="0 0 0" 
                 animation-mixer
                 interactive-logic
-                animation__autorotate="property: rotation; to: 0 360 0; loop: true; dur: 20000; easing: linear">
+                animation__autorotate="property: rotation; from: 0 0 0; to: 0 360 0; loop: true; dur: 20000; easing: linear">
             </a-gltf-model>
         </a-entity>
 
     </a-scene>
 
-    <div id="Status-Notif">🔍 Scan Markers 3 ...</div>
+    <div id="Status-Notif">🔍 Scan Markers 3...</div>
     <a href="dashboard.html" class="back-btn">Back</a>
 </body>
 </html>
