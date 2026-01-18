@@ -22,11 +22,6 @@
             border-radius: 50px; font-family: sans-serif;
             text-align: center; min-width: 250px;
             border: 2px solid #20aaee;
-            transition: all 0.3s ease;
-        }
-        .success-notif {
-            background-color: #28a745 !important;
-            border-color: white !important;
         }
     </style>
 
@@ -41,38 +36,44 @@
                 targetEntity.addEventListener("targetFound", () => {
                     if (isFrozen) return;
                     
-                    ui.innerHTML = "✅ Marker Terdeteksi! Mengunci...";
-                    ui.classList.add("success-notif");
+                    ui.innerHTML = "✅ Marker Ditemukan! Mengunci...";
+                    ui.style.backgroundColor = "#28a745";
 
-                    // Jeda agar posisi tracking stabil sebelum dicopot
+                    // Jeda 1.5 detik agar posisi tracking benar-benar stabil
                     setTimeout(() => {
                         const worldPos = new THREE.Vector3();
                         const worldQuat = new THREE.Quaternion();
                         const worldScale = new THREE.Vector3();
 
-                        // 1. Ambil koordinat absolut model di dunia nyata
+                        // 1. Ambil posisi dunia nyata
                         el.object3D.getWorldPosition(worldPos);
                         el.object3D.getWorldQuaternion(worldQuat);
                         el.object3D.getWorldScale(worldScale);
 
-                        // 2. Pindahkan objek ke root scene agar mandiri
+                        // 2. Pindahkan objek ke root scene
                         el.sceneEl.appendChild(el);
 
-                        // 3. Terapkan kembali posisinya agar tidak berpindah
+                        // 3. Terapkan kembali transformasi
                         el.object3D.position.copy(worldPos);
                         el.object3D.quaternion.copy(worldQuat);
                         el.object3D.scale.copy(worldScale);
 
-                        // 4. Paksa agar tetap terlihat dan matikan kontrol MindAR pada objek ini
-                        el.setAttribute('visible', true);
+                        // 4. PERBAIKAN KRUSIAL: Paksa visible tetap true setiap frame
                         isFrozen = true;
+                        el.setAttribute('visible', 'true');
                         
-                        ui.innerHTML = "🚀 Objek Terkunci! Anda boleh bergerak.";
-                        
-                        // Sembunyikan notifikasi setelah 5 detik
-                        setTimeout(() => { ui.style.opacity = "0"; }, 5000);
-                    }, 1200);
+                        // Hentikan MindAR dari mengontrol visibilitas objek ini
+                        el.removeAttribute('mindar-image-target'); 
+
+                        ui.innerHTML = "🚀 Objek Terkunci! Lepaskan Kartu.";
+                    }, 1500);
                 });
+            },
+            // Paksa objek tetap terlihat jika MindAR mencoba menyembunyikannya
+            tick: function() {
+                if (this.isFrozen && !this.el.getAttribute('visible')) {
+                    this.el.setAttribute('visible', 'true');
+                }
             }
         });
     </script>
@@ -80,7 +81,7 @@
 
 <body>
     <a-scene 
-        mindar-image="imageTargetSrc: ./markers/targets.mind; maxTrack: 1; filterMinCF:0.0001; filterBeta: 0.001;" 
+        mindar-image="imageTargetSrc: ./markers/targets.mind; maxTrack: 1;" 
         color-space="sRGB" 
         renderer="colorManagement: true, physicallyCorrectLights: true" 
         vr-mode-ui="enabled: false"
@@ -97,14 +98,12 @@
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
         <a-entity mindar-image-target="targetIndex: 0">
-            <a-plane src="#card1" position="0 0 0" height="0.5" width="0.5" rotation="0 0 0" opacity="0.4"></a-plane>
-
             <a-gltf-model 
                 id="earthModel"
                 src="#model1" 
-                position="0 0 0.1" 
+                position="0 0 0" 
                 rotation="0 0 0" 
-                scale="0.05 0.05 0.05" 
+                scale="0.5 0.5 0.5" 
                 animation-mixer
                 freeze-location>
             </a-gltf-model>
