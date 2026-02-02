@@ -176,8 +176,13 @@
                 currentSlide++;
                 updateUI();
             } else {
-                alert("Memulai Pengalaman AR...");
-                // Tambahkan logika untuk menutup modal atau pindah halaman di sini
+                // Mengubah teks tombol agar user tahu sedang memproses
+                const nextBtn = document.getElementById('nextBtn');
+                nextBtn.innerText = 'Memuat...';
+        
+                setTimeout(() => {
+                    window.location.href = "start.html";
+                }, 300); // delay 0.3 detik untuk kesan smooth
             }
         }
 
@@ -190,6 +195,7 @@
     </script>
 </body>
 </html>
+
 
 
 
