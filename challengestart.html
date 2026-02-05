@@ -1,0 +1,25 @@
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const role = localStorage.getItem('role');
+    const roomId = localStorage.getItem('room_id');
+
+    if (!role || !roomId) { window.location.href = 'index.html'; }
+
+    window.onload = function() {
+        if (role === 'master') {
+            document.body.innerHTML = `
+                <div class="p-10 text-center">
+                    <h1 class="text-2xl font-bold">Panel Pemantauan Master (Room: ${roomId})</h1>
+                    <div id="playerList" class="mt-4 border p-4 bg-white rounded shadow text-left">
+                        Menunggu peserta bergabung...
+                    </div>
+                    <button class="mt-6 bg-green-600 text-white px-6 py-2 rounded">Mulai Challenge</button>
+                </div>
+            `;
+            // Logika ambil data peserta secara real-time dari Supabase bisa ditaruh di sini
+        } else {
+            // Jika dia participant, langsung lempar ke form penilaian
+            window.location.href = 'formpenilaian.html';
+        }
+    }
+</script>
