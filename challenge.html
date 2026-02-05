@@ -106,12 +106,15 @@ async function handleJoin() {
     const roomId = document.getElementById('joinRoomId').value.trim();
     const pw = document.getElementById('joinPw').value.trim();
 
+    // 1. Validasi Input Kosong
     if(!name || !roomId || !pw) return alert("Harap isi semua kolom!");
+
+    // 2. Validasi Format Angka (4-6 Digit)
     if(!isValidCode(roomId) || !isValidCode(pw)) {
         return alert("Room ID dan Password harus berupa angka (4 - 6 digit)!");
     }
 
-    // 1. CEK: Validasi keberadaan room & password
+    // 3. VALIDASI: Cek apakah Room ID dan Password cocok di tabel 'rooms'
     const { data: roomData, error: roomError } = await db
         .from('rooms')
         .select('room_id')
@@ -123,15 +126,29 @@ async function handleJoin() {
         return alert("Room ID atau Password salah!");
     }
 
-    // 2. CATAT: Masukkan ke tabel peserta
-    const { error: partError } = await db
+    // 4. CEK: Apakah nama ini sudah terdaftar di room tersebut?
+    const { data: existingPart, error: partCheckError } = await db
         .from('participants')
-        .insert([{ room_id: roomId, student_name: name }]);
+        .select('*')
+        .eq('room_id', roomId)
+        .eq('student_name', name)
+        .maybeSingle();
 
-    if (!partError) {
+    if (existingPart) {
+        // Jika sudah ada, langsung masuk tanpa insert lagi
+        console.log("Peserta sudah terdaftar, mengalihkan...");
         lanjutKeWaitingRoom('participant', roomId, name);
     } else {
-        alert("Gagal mendaftar: " + partError.message);
+        // 5. PENCATATAN: Jika belum ada, baru masukkan ke tabel 'participants'
+        const { error: partInsertError } = await db
+            .from('participants')
+            .insert([{ room_id: roomId, student_name: name }]);
+
+        if (!partInsertError) {
+            lanjutKeWaitingRoom('participant', roomId, name);
+        } else {
+            alert("Gagal bergabung: " + partInsertError.message);
+        }
     }
 }
 
