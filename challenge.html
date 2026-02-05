@@ -13,7 +13,6 @@
         <button onclick="openModal('modalParticipation')" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 shadow-lg transition-all active:scale-95">
             Participation
         </button>
-        
         <button onclick="openModal('modalMaster')" class="bg-green-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-green-700 shadow-lg transition-all active:scale-95">
             Room Master
         </button>
@@ -23,9 +22,9 @@
         <div class="bg-white p-8 rounded-xl w-full max-w-sm shadow-2xl">
             <h2 class="text-xl font-bold mb-4 text-blue-600 border-b pb-2">Join Challenge</h2>
             <div class="space-y-3">
-                <input type="text" id="partName" placeholder="Nama Anda" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none">
-                <input type="text" id="joinRoomId" placeholder="Room ID" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none">
-                <input type="password" id="joinPw" placeholder="Password Room" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                <input type="text" id="partName" placeholder="Nama Anda" class="w-full border p-2 rounded outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="text" id="joinRoomId" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="Room ID (4-6 Angka)" class="w-full border p-2 rounded outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="password" id="joinPw" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="Password (4-6 Angka)" class="w-full border p-2 rounded outline-none focus:ring-2 focus:ring-blue-500">
             </div>
             <div class="flex justify-end mt-6 space-x-2">
                 <button onclick="closeModal('modalParticipation')" class="text-gray-500 px-4 py-2 hover:bg-gray-100 rounded">Batal</button>
@@ -38,9 +37,9 @@
         <div class="bg-white p-8 rounded-xl w-full max-w-sm shadow-2xl">
             <h2 class="text-xl font-bold mb-4 text-green-600 border-b pb-2">Create New Room</h2>
             <div class="space-y-3">
-                <input type="text" id="masterName" placeholder="Nama Master" class="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 outline-none">
-                <input type="text" id="createRoomId" placeholder="Buat Room ID" class="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 outline-none">
-                <input type="password" id="createPw" placeholder="Buat Password" class="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 outline-none">
+                <input type="text" id="masterName" placeholder="Nama Master" class="w-full border p-2 rounded outline-none focus:ring-2 focus:ring-green-500">
+                <input type="text" id="createRoomId" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="Buat Room ID (4-6 Angka)" class="w-full border p-2 rounded outline-none focus:ring-2 focus:ring-green-500">
+                <input type="password" id="createPw" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="Buat Password (4-6 Angka)" class="w-full border p-2 rounded outline-none focus:ring-2 focus:ring-green-500">
             </div>
             <div class="flex justify-end mt-6 space-x-2">
                 <button onclick="closeModal('modalMaster')" class="text-gray-500 px-4 py-2 hover:bg-gray-100 rounded">Batal</button>
@@ -50,46 +49,40 @@
     </div>
 
     <script>
-        // KREDENSIAL SUPABASE
         const supabaseUrl = 'https://bmswsgtgxmijjomkltzx.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJtc3dzZ3RneG1pampvbWtsdHp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTc5MDIsImV4cCI6MjA4NTg3MzkwMn0.tudVaH1BpfQA2h6EhWv2ekmhAPMTgDhiEKRbvCOM074';
-        
-        // Inisialisasi client (Gunakan nama variabel berbeda untuk menghindari bentrok)
         const db = supabase.createClient(supabaseUrl, supabaseKey);
 
-        // Fungsi Modal
-        function openModal(id) {
-            console.log("Membuka modal: " + id); // Untuk cek di console
-            document.getElementById(id).classList.remove('hidden');
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        // Fungsi Validasi Khusus Angka 4-6 Digit
+        function isValidCode(code) {
+            const regex = /^[0-9]{4,6}$/; // Hanya angka, panjang 4 sampai 6
+            return regex.test(code);
         }
 
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-        }
-
-        // Handle Buat Room (Master)
         async function handleCreate() {
             const name = document.getElementById('masterName').value;
             const roomId = document.getElementById('createRoomId').value;
             const pw = document.getElementById('createPw').value;
 
             if(!name || !roomId || !pw) return alert("Harap isi semua kolom!");
+            
+            if(!isValidCode(roomId) || !isValidCode(pw)) {
+                return alert("Room ID dan Password harus berupa angka (4 - 6 digit)!");
+            }
 
-            const { error } = await db.from('rooms').insert([
-                { room_id: roomId, password: pw, master_name: name }
-            ]);
+            const { error } = await db.from('rooms').insert([{ room_id: roomId, password: pw, master_name: name }]);
             
             if (!error) {
                 localStorage.setItem('role', 'master');
                 localStorage.setItem('room_id', roomId);
                 localStorage.setItem('username', name);
                 window.location.href = 'challengestart.html';
-            } else { 
-                alert("Gagal: " + error.message); 
-            }
+            } else { alert("Gagal: " + error.message); }
         }
 
-        // Handle Masuk (Participant)
         async function handleJoin() {
             const name = document.getElementById('partName').value;
             const roomId = document.getElementById('joinRoomId').value;
@@ -97,28 +90,19 @@
 
             if(!name || !roomId || !pw) return alert("Harap isi semua kolom!");
 
-            // Cek Room ID dan Password saja
-            const { data, error } = await db
-                .from('rooms')
-                .select('*')
-                .eq('room_id', roomId)
-                .eq('password', pw)
-                .single();
+            if(!isValidCode(roomId) || !isValidCode(pw)) {
+                return alert("Room ID dan Password harus berupa angka (4 - 6 digit)!");
+            }
+
+            const { data, error } = await db.from('rooms').select('*').eq('room_id', roomId).eq('password', pw).single();
 
             if (data) {
                 localStorage.setItem('role', 'participant');
                 localStorage.setItem('room_id', roomId);
                 localStorage.setItem('username', name);
-                
-                // Tambahkan data ke tabel peserta agar Master bisa lihat
-                await db.from('participants').insert([
-                    { room_id: roomId, student_name: name }
-                ]);
-
+                await db.from('participants').insert([{ room_id: roomId, student_name: name }]);
                 window.location.href = 'challengestart.html';
-            } else { 
-                alert("Room ID atau Password salah!"); 
-            }
+            } else { alert("Room ID atau Password salah!"); }
         }
     </script>
 </body>
