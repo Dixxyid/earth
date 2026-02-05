@@ -83,27 +83,54 @@
             } else { alert("Gagal: " + error.message); }
         }
 
-        async function handleJoin() {
-            const name = document.getElementById('partName').value;
-            const roomId = document.getElementById('joinRoomId').value;
-            const pw = document.getElementById('joinPw').value;
+async function handleJoin() {
+    const name = document.getElementById('partName').value.trim();
+    const roomId = document.getElementById('joinRoomId').value.trim();
+    const pw = document.getElementById('joinPw').value.trim();
 
-            if(!name || !roomId || !pw) return alert("Harap isi semua kolom!");
+    // 1. Validasi Input Kosong
+    if(!name || !roomId || !pw) return alert("Harap isi semua kolom!");
 
-            if(!isValidCode(roomId) || !isValidCode(pw)) {
-                return alert("Room ID dan Password harus berupa angka (4 - 6 digit)!");
+    // 2. Validasi Format Angka (4-6 Digit)
+    if(!isValidCode(roomId) || !isValidCode(pw)) {
+        return alert("Room ID dan Password harus berupa angka (4 - 6 digit)!");
+    }
+
+    // 3. VALIDASI: Cek apakah Room ID dan Password cocok di tabel 'rooms'
+    const { data: roomData, error: roomError } = await db
+        .from('rooms')
+        .select('room_id') // Kita hanya butuh konfirmasi keberadaan room
+        .eq('room_id', roomId)
+        .eq('password', pw)
+        .single();
+
+    if (roomError || !roomData) {
+        return alert("Room ID atau Password salah!");
+    }
+
+    // 4. PENCATATAN: Tulis nama dan room_id ke tabel 'participants'
+    const { error: partError } = await db
+        .from('participants')
+        .insert([
+            { 
+                room_id: roomId,      // Mencatat ID Room
+                student_name: name    // Mencatat Nama Peserta
+                // Kolom score tidak perlu ditulis jika sudah ada default 0 di database
             }
+        ]);
 
-            const { data, error } = await db.from('rooms').select('*').eq('room_id', roomId).eq('password', pw).single();
+    if (partError) {
+        console.error("Detail Error:", partError);
+        return alert("Gagal mendaftar ke room: " + partError.message);
+    }
 
-            if (data) {
-                localStorage.setItem('role', 'participant');
-                localStorage.setItem('room_id', roomId);
-                localStorage.setItem('username', name);
-                await db.from('participants').insert([{ room_id: roomId, student_name: name }]);
-                window.location.href = 'challengestart.html';
-            } else { alert("Room ID atau Password salah!"); }
-        }
+    // 5. PENYIMPANAN LOKAL & REDIRECT
+    localStorage.setItem('role', 'participant');
+    localStorage.setItem('room_id', roomId);
+    localStorage.setItem('username', name);
+    
+    window.location.href = 'challengestart.html';
+}
     </script>
 </body>
 </html>
