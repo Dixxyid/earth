@@ -14,7 +14,6 @@
         .animate-bounce-short { animation: bounce-short 0.4s ease-out; }
         body { font-style: normal; }
         
-        /* Modal Blur Effect */
         .modal-backdrop {
             backdrop-filter: blur(4px);
             background-color: rgba(0, 0, 0, 0.4);
@@ -33,7 +32,7 @@
                 </div>
                 <h3 class="text-xl font-bold text-gray-800 mb-2">Konfirmasi Selesai</h3>
                 <p class="text-gray-500 text-sm leading-relaxed">
-                    Data akan didownload dan <span class="font-bold text-red-600">dihapus permanen</span> dari database penyimpanan. Lanjutkan?
+                    Data akan didownload dan <span class="font-bold text-red-600">dihapus permanen</span> dari database. Lanjutkan?
                 </p>
             </div>
             <div class="flex border-t border-gray-100">
@@ -60,6 +59,7 @@
 
         const role = localStorage.getItem('role');
         const roomId = localStorage.getItem('room_id');
+        let masterNameFromDB = ""; // Akan diisi dari database
         let currentSort = 'score'; 
 
         if (!role || !roomId) { window.location.href = 'index.html'; }
@@ -74,24 +74,44 @@
             return "bg-blue-600 text-white border-blue-700";
         }
 
-        window.onload = function() {
+        window.onload = async function() {
             const container = document.getElementById('mainContent');
 
             if (role === 'master') {
+                // AMBIL NAMA MASTER DARI DATABASE TERLEBIH DAHULU
+                const { data: roomData, error: roomError } = await db
+                    .from('rooms')
+                    .select('master_name')
+                    .eq('room_id', roomId)
+                    .single();
+
+                if (roomError || !roomData) {
+                    alert("Room tidak ditemukan di database.");
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                masterNameFromDB = roomData.master_name.toUpperCase();
+
                 container.innerHTML = `
                     <div class="w-full max-w-2xl bg-white p-8 rounded-2xl shadow-xl">
                         <div class="mb-6">
                             <h1 class="text-3xl font-extrabold text-gray-800 uppercase tracking-tight mb-4">Master Panel</h1>
                             
-                            <div class="flex justify-between items-center bg-gray-50 px-4 py-3 rounded-xl border border-gray-100">
-                                <p class="text-gray-500 font-medium">Room ID: <span class="text-green-600 font-mono font-bold text-lg ml-1">${roomId}</span></p>
-                                <div class="flex items-center text-green-500 font-bold text-xs uppercase tracking-wider">
-                                    <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-ping"></span> Live Status
+                            <div class="flex flex-col gap-2 bg-gray-50 px-4 py-3 rounded-xl border border-gray-100">
+                                <div class="flex justify-between items-center">
+                                    <p class="text-gray-500 font-medium text-sm">Room ID: <span class="text-green-600 font-mono font-bold ml-1">${roomId}</span></p>
+                                    <div class="flex items-center text-green-500 font-bold text-[10px] uppercase tracking-wider">
+                                        <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-ping"></span> Live Status
+                                    </div>
+                                </div>
+                                <div class="border-t border-gray-200 pt-2">
+                                    <p class="text-gray-500 font-medium text-sm">Master Room: <span class="text-blue-600 font-bold">${masterNameFromDB}</span></p>
                                 </div>
                             </div>
 
-                            <div class="mt-4 text-center sm:text-left">
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Indikator Rentang Nilai:</p>
+                            <div class="mt-4">
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 text-center sm:text-left">Indikator Nilai:</p>
                                 <div class="grid grid-cols-4 sm:grid-cols-7 gap-1 text-[8px] font-bold uppercase">
                                     <div class="py-1.5 text-center bg-pink-100 text-pink-600 rounded-md border border-pink-200">0-20</div>
                                     <div class="py-1.5 text-center bg-red-100 text-red-600 rounded-md border border-red-200">21-40</div>
@@ -109,16 +129,14 @@
                         <div class="text-left">
                             <div class="flex justify-between items-center mb-3">
                                 <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center">
-                                    Peserta Terhubung (<span id="participantCount" class="mx-1 text-gray-800">0</span>)
+                                    Peserta (<span id="participantCount" class="mx-1 text-gray-800">0</span>)
                                 </h2>
                                 <select id="sortOption" onchange="changeSort(this.value)" class="text-[10px] font-bold border rounded-md px-2 py-1 bg-gray-50 text-gray-600 outline-none">
-                                    <option value="score">SORT BY: SKOR TERTINGGI</option>
-                                    <option value="name">SORT BY: NAMA A-Z</option>
+                                    <option value="score">SORT BY: SKOR</option>
+                                    <option value="name">SORT BY: NAMA</option>
                                 </select>
                             </div>
-
-                            <div id="playerList" class="grid grid-cols-1 sm:grid-cols-2 gap-3 min-h-[150px] border-2 border-dashed border-gray-100 p-4 rounded-xl bg-gray-50/50">
-                            </div>
+                            <div id="playerList" class="grid grid-cols-1 sm:grid-cols-2 gap-3 min-h-[150px] border-2 border-dashed border-gray-100 p-4 rounded-xl bg-gray-50/50"></div>
                         </div>
 
                         <button onclick="showModal()" class="w-full mt-8 bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-green-100 transition-all active:scale-95 uppercase tracking-widest">
@@ -126,7 +144,6 @@
                         </button>
                     </div>
                 `;
-                
                 fetchParticipants();
                 initRealtime();
             } else {
@@ -134,7 +151,6 @@
             }
         }
 
-        // FUNGSI MODAL
         function showModal() { document.getElementById('customModal').classList.remove('hidden'); }
         function closeModal() { document.getElementById('customModal').classList.add('hidden'); }
 
@@ -142,7 +158,6 @@
             let query = db.from('participants').select('student_name, score').eq('room_id', roomId);
             if (currentSort === 'score') { query = query.order('score', { ascending: false }); } 
             else { query = query.order('student_name', { ascending: true }); }
-
             const { data, error } = await query;
             if (!error) {
                 document.getElementById('participantCount').innerText = data.length;
@@ -150,35 +165,26 @@
             }
         }
 
-        function changeSort(val) {
-            currentSort = val;
-            fetchParticipants();
-        }
+        function changeSort(val) { currentSort = val; fetchParticipants(); }
 
         function renderPlayerList(list) {
             const listDiv = document.getElementById('playerList');
             if (!listDiv) return;
-
             if (list.length === 0) {
                 listDiv.innerHTML = `<p class="text-gray-400 col-span-2 text-center py-10 italic text-xs">Menunggu peserta bergabung...</p>`;
             } else {
-                listDiv.innerHTML = list.map(p => {
-                    const score = p.score || 0;
-                    return `
-                        <div class="bg-white border border-gray-200 px-4 py-3 rounded-xl shadow-sm flex items-center justify-between animate-bounce-short">
-                            <div class="flex items-center space-x-3 overflow-hidden">
-                                <div class="w-8 h-8 bg-gray-800 text-white rounded-full flex-shrink-0 flex items-center justify-center font-bold text-[10px]">
-                                    ${p.student_name.charAt(0).toUpperCase()}
-                                </div>
-                                <span class="font-bold text-gray-700 truncate text-sm font-sans">${p.student_name}</span>
-                            </div>
-                            <div class="${getScoreStyle(score)} px-3 py-1 rounded-lg text-xs font-black border flex flex-col items-center min-w-[50px]">
-                                <span class="text-[7px] opacity-70 leading-none mb-0.5 uppercase">Score</span>
-                                <span>${score}</span>
-                            </div>
+                listDiv.innerHTML = list.map(p => `
+                    <div class="bg-white border border-gray-200 px-4 py-3 rounded-xl shadow-sm flex items-center justify-between animate-bounce-short">
+                        <div class="flex items-center space-x-3 overflow-hidden">
+                            <div class="w-8 h-8 bg-gray-800 text-white rounded-full flex-shrink-0 flex items-center justify-center font-bold text-[10px]">${p.student_name.charAt(0).toUpperCase()}</div>
+                            <span class="font-bold text-gray-700 truncate text-sm">${p.student_name}</span>
                         </div>
-                    `;
-                }).join('');
+                        <div class="${getScoreStyle(p.score || 0)} px-3 py-1 rounded-lg text-xs font-black border flex flex-col items-center min-w-[50px]">
+                            <span class="text-[7px] opacity-70 leading-none mb-0.5 uppercase">Score</span>
+                            <span>${p.score || 0}</span>
+                        </div>
+                    </div>
+                `).join('');
             }
         }
 
@@ -186,13 +192,13 @@
             db.channel('room-updates').on('postgres_changes', { event: '*', schema: 'public', table: 'participants', filter: `room_id=eq.${roomId}` }, () => { fetchParticipants(); }).subscribe();
         }
 
-        // FUNGSI EKSEKUSI
         async function prosesDownloadDanHapus() {
             closeModal();
             const container = document.getElementById('mainContent');
-            container.innerHTML = `<div class="text-center font-bold text-gray-500 animate-pulse">Sedang memproses & membersihkan database...</div>`;
+            container.innerHTML = `<div class="text-center font-bold text-gray-500 animate-pulse">Memproses & Membersihkan Database...</div>`;
 
             try {
+                // 1. Ambil data peserta
                 const { data: participants, error: fetchError } = await db
                     .from('participants')
                     .select('student_name, score')
@@ -200,35 +206,41 @@
                     .order('score', { ascending: false });
 
                 if (fetchError || !participants || participants.length === 0) {
-                    alert("Gagal mengambil data atau peserta sudah kosong.");
+                    alert("Data kosong.");
                     location.reload();
                     return;
                 }
 
-                // Download CSV
-                let csvContent = "PERINGKAT,NAMA PESERTA,SKOR,ROOM ID\n";
+                // 2. Susun CSV dengan Header Informasi Master
+                let csvContent = `NAMA MASTER ROOM,${masterNameFromDB}\n`;
+                csvContent += `ROOM ID,${roomId}\n`;
+                csvContent += `TANGGAL DOWNLOAD,${new Date().toLocaleString('id-ID')}\n\n`;
+                csvContent += `PERINGKAT,NAMA PESERTA,SKOR\n`;
+                
                 participants.forEach((p, index) => {
-                    csvContent += `${index + 1},${p.student_name},${p.score || 0},${roomId}\n`;
+                    csvContent += `${index + 1},${p.student_name.toUpperCase()},${p.score || 0}\n`;
                 });
 
+                // 3. Download File
                 const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `Rekap_Challenge_${roomId}.csv`;
+                // Format Nama File: Rekap_MASTER_ID.csv
+                a.download = `Rekap_${masterNameFromDB.replace(/\s+/g, '_')}_${roomId}.csv`;
                 a.click();
 
-                // Cleanup Database
+                // 4. Hapus data dari database (Cleanup)
                 await db.from('participants').delete().eq('room_id', roomId);
                 await db.from('rooms').delete().eq('room_id', roomId);
 
-                alert("Data Berhasil Didownload & Database Telah Dibersihkan!");
+                alert("Selesai! Data didownload & database dibersihkan.");
                 localStorage.clear();
                 window.location.href = 'index.html';
 
             } catch (err) {
                 console.error(err);
-                alert("Terjadi kesalahan teknis: " + err.message);
+                alert("Error: " + err.message);
                 location.reload();
             }
         }
