@@ -29,11 +29,10 @@
 
         const role = localStorage.getItem('role');
         const roomId = localStorage.getItem('room_id');
-        const username = localStorage.getItem('username');
+        let currentSort = 'score'; // Default sort
 
         if (!role || !roomId) { window.location.href = 'index.html'; }
 
-        // Fungsi Helper untuk menentukan kelas warna berdasarkan skor
         function getScoreStyle(score) {
             if (score <= 20) return "bg-pink-100 text-pink-600 border-pink-200";
             if (score <= 40) return "bg-red-100 text-red-600 border-red-200";
@@ -41,7 +40,7 @@
             if (score <= 70) return "bg-yellow-100 text-yellow-600 border-yellow-200";
             if (score <= 80) return "bg-green-100 text-green-600 border-green-200";
             if (score <= 90) return "bg-sky-100 text-sky-600 border-sky-200";
-            return "bg-blue-600 text-white border-blue-700"; // Biru Solid (>90)
+            return "bg-blue-600 text-white border-blue-700";
         }
 
         window.onload = function() {
@@ -52,16 +51,14 @@
                     <div class="w-full max-w-2xl bg-white p-8 rounded-2xl shadow-xl">
                         <div class="flex justify-between items-start mb-4">
                             <div>
-                                <h1 class="text-3xl font-extrabold text-gray-800">Master Panel</h1>
-                                <p class="text-gray-500 font-medium text-lg">Room: <span class="text-green-600 font-mono">${roomId}</span></p>
+                                <h1 class="text-3xl font-extrabold text-gray-800 italic">Master Panel</h1>
+                                <p class="text-gray-500 font-medium">Room: <span class="text-green-600 font-mono">${roomId}</span></p>
                             </div>
                             <div class="text-right">
-                                <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Status</span>
-                                <div class="flex items-center justify-end text-green-500 font-bold mb-2">
-                                    <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-ping"></span> Live
+                                <div class="flex items-center justify-end text-green-500 font-bold mb-2 text-xs uppercase">
+                                    <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-ping"></span> Live Status
                                 </div>
-                                
-                                <div class="grid grid-cols-4 gap-1 text-[8px] font-bold uppercase">
+                                <div class="grid grid-cols-4 gap-1 text-[7px] font-bold uppercase">
                                     <div class="px-1 bg-pink-100 text-pink-600 rounded">0-20</div>
                                     <div class="px-1 bg-red-100 text-red-600 rounded">21-40</div>
                                     <div class="px-1 bg-orange-100 text-orange-600 rounded">41-60</div>
@@ -76,39 +73,54 @@
                         <hr class="mb-6 border-gray-100">
                         
                         <div class="text-left">
-                            <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 flex justify-between">
-                                <span>Peserta Terhubung</span>
-                                <span id="participantCount">0 Orang</span>
-                            </h2>
+                            <div class="flex justify-between items-center mb-3">
+                                <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center">
+                                    Peserta Terhubung (<span id="participantCount">0</span>)
+                                </h2>
+                                <select id="sortOption" onchange="changeSort(this.value)" class="text-[10px] font-bold border rounded px-2 py-1 bg-gray-50 text-gray-600 outline-none focus:ring-2 focus:ring-green-500">
+                                    <option value="score">SORT BY: SKOR TERTINGGI</option>
+                                    <option value="name">SORT BY: NAMA A-Z</option>
+                                </select>
+                            </div>
+
                             <div id="playerList" class="grid grid-cols-1 sm:grid-cols-2 gap-3 min-h-[150px] border-2 border-dashed border-gray-100 p-4 rounded-xl bg-gray-50/50">
                                 </div>
                         </div>
 
-                        <button onclick="mulaiChallenge()" class="w-full mt-8 bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-green-100 transition-all active:scale-95">
-                            MULAI CHALLENGE
+                        <button onclick="mulaiChallenge()" class="w-full mt-8 bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-green-100 transition-all active:scale-95 uppercase tracking-widest">
+                            Mulai Challenge
                         </button>
                     </div>
                 `;
                 
                 fetchParticipants();
                 initRealtime();
-
             } else {
                 window.location.href = 'formpenilaian.html';
             }
         }
 
         async function fetchParticipants() {
-            const { data, error } = await db
-                .from('participants')
-                .select('student_name, score')
-                .eq('room_id', roomId)
-                .order('score', { ascending: false });
+            let query = db.from('participants').select('student_name, score').eq('room_id', roomId);
+            
+            // Logika Sorting
+            if (currentSort === 'score') {
+                query = query.order('score', { ascending: false });
+            } else {
+                query = query.order('student_name', { ascending: true });
+            }
+
+            const { data, error } = await query;
 
             if (!error) {
-                document.getElementById('participantCount').innerText = `${data.length} Orang`;
+                document.getElementById('participantCount').innerText = data.length;
                 renderPlayerList(data);
             }
+        }
+
+        function changeSort(val) {
+            currentSort = val;
+            fetchParticipants();
         }
 
         function renderPlayerList(list) {
@@ -116,23 +128,21 @@
             if (!listDiv) return;
 
             if (list.length === 0) {
-                listDiv.innerHTML = `<p class="text-gray-400 col-span-2 text-center py-10 italic">Menunggu peserta...</p>`;
+                listDiv.innerHTML = `<p class="text-gray-400 col-span-2 text-center py-10 italic text-xs">Menunggu peserta bergabung...</p>`;
             } else {
                 listDiv.innerHTML = list.map(p => {
-                    const currentScore = p.score || 0;
-                    const colorClass = getScoreStyle(currentScore);
-                    
+                    const score = p.score || 0;
                     return `
-                        <div class="bg-white border border-gray-200 px-4 py-3 rounded-xl shadow-sm flex items-center justify-between animate-bounce-short hover:border-gray-300 transition-colors">
+                        <div class="bg-white border border-gray-200 px-4 py-3 rounded-xl shadow-sm flex items-center justify-between animate-bounce-short">
                             <div class="flex items-center space-x-3 overflow-hidden">
-                                <div class="w-8 h-8 bg-gray-800 text-white rounded-full flex-shrink-0 flex items-center justify-center font-bold text-xs">
+                                <div class="w-8 h-8 bg-gray-800 text-white rounded-full flex-shrink-0 flex items-center justify-center font-bold text-[10px]">
                                     ${p.student_name.charAt(0).toUpperCase()}
                                 </div>
-                                <span class="font-bold text-gray-700 truncate">${p.student_name}</span>
+                                <span class="font-bold text-gray-700 truncate text-sm">${p.student_name}</span>
                             </div>
-                            <div class="${colorClass} px-3 py-1 rounded-lg text-xs font-black border flex flex-col items-center min-w-[50px]">
-                                <span class="text-[8px] opacity-70 leading-none mb-0.5">SCORE</span>
-                                <span>${currentScore}</span>
+                            <div class="${getScoreStyle(score)} px-3 py-1 rounded-lg text-xs font-black border flex flex-col items-center min-w-[50px]">
+                                <span class="text-[7px] opacity-70 leading-none mb-0.5">SCORE</span>
+                                <span>${score}</span>
                             </div>
                         </div>
                     `;
@@ -154,7 +164,7 @@
         }
 
         function mulaiChallenge() {
-            alert("Sistem Pemantauan Aktif! Skor akan berubah otomatis saat siswa menginput.");
+            alert("Mode Pemantauan Skor Aktif!");
         }
     </script>
 </body>
