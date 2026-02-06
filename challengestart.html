@@ -238,6 +238,69 @@
                 alert("Error: " + err.message);
                 location.reload();
             }
+        }async function prosesDownloadDanHapus() {
+            closeModal();
+            const container = document.getElementById('mainContent');
+            container.innerHTML = `<div class="text-center font-bold text-gray-500 animate-pulse">Memproses & Membersihkan Database...</div>`;
+
+            try {
+                const { data: participants, error: fetchError } = await db
+                    .from('participants')
+                    .select('student_name, score')
+                    .eq('room_id', roomId)
+                    .order('score', { ascending: false });
+
+                if (fetchError || !participants || participants.length === 0) {
+                    alert("Data tidak ditemukan atau sudah dihapus.");
+                    location.reload();
+                    return;
+                }
+
+                // 1. Definisikan Header dan Konten
+                // Menggunakan \ufeff (BOM) agar Excel otomatis memisahkan kolom dengan benar
+                let csvContent = "\ufeff"; 
+                csvContent += `INFO REKAP NILAI\n`;
+                csvContent += `NAMA MASTER ROOM,${masterNameFromDB}\n`;
+                csvContent += `ROOM ID,${roomId}\n`;
+                csvContent += `TANGGAL DOWNLOAD,${new Date().toLocaleString('id-ID')}\n\n`;
+                
+                // Header Tabel
+                csvContent += `PERINGKAT,NAMA PESERTA,SKOR\n`;
+                
+                // Isi Tabel
+                participants.forEach((p, index) => {
+                    // Membersihkan nama dari karakter koma agar tidak merusak kolom CSV
+                    const cleanName = p.student_name.toUpperCase().replace(/,/g, '');
+                    csvContent += `${index + 1},${cleanName},${p.score || 0}\n`;
+                });
+
+                // 2. Proses Download dengan Blob UTF-8
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                
+                // Nama File: Rekap_NAMA_ID.csv
+                const safeFileName = masterNameFromDB.replace(/\s+/g, '_');
+                a.download = `Rekap_${safeFileName}_${roomId}.csv`;
+                
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+
+                // 3. Hapus data dari database (Cleanup)
+                await db.from('participants').delete().eq('room_id', roomId);
+                await db.from('rooms').delete().eq('room_id', roomId);
+
+                alert("Selesai! Data berhasil diunduh dan dibersihkan.");
+                localStorage.clear();
+                window.location.href = 'index.html';
+
+            } catch (err) {
+                console.error(err);
+                alert("Terjadi kesalahan: " + err.message);
+                location.reload();
+            }
         }
     </script>
 </body>
