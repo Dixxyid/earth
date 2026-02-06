@@ -91,8 +91,8 @@
                                 </div>
                         </div>
 
-                        <button onclick="mulaiChallenge()" class="w-full mt-8 bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-green-100 transition-all active:scale-95 uppercase tracking-widest">
-                            Mulai Challenge
+                        <button onclick="downloadAndCleanup()" class="w-full mt-8 bg-red-600 hover:bg-red-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-red-100 transition-all active:scale-95 uppercase tracking-widest">
+                            Selesaikan & Download Rekap
                         </button>
                     </div>
                 `;
@@ -166,9 +166,72 @@
                 .subscribe();
         }
 
-        function mulaiChallenge() {
-            alert("Sistem Monitoring Skor Aktif!");
+       // 6. FUNGSI DOWNLOAD & CLEANUP DATABASE
+async function downloadAndCleanup() {
+    // 1. Tampilkan Konfirmasi Pop-up
+    const yakin = confirm(
+        "PERINGATAN: Apakah Anda yakin?\n\n" +
+        "1. Data hasil challenge akan didownload.\n" +
+        "2. Setelah download selesai, data Room & Peserta akan DIHAPUS PERMANEN dari database untuk menghemat ruang.\n\n" +
+        "Lanjutkan?"
+    );
+
+    if (!yakin) return;
+
+    try {
+        // 2. Ambil data terakhir untuk didownload
+        const { data: participants, error: fetchError } = await db
+            .from('participants')
+            .select('student_name, score')
+            .eq('room_id', roomId)
+            .order('score', { ascending: false });
+
+        if (fetchError || !participants || participants.length === 0) {
+            alert("Gagal mengambil data atau peserta masih kosong.");
+            return;
         }
+
+        // 3. Proses Pembuatan File (Format CSV agar mudah dibuka di Excel)
+        let csvContent = "PERINGKAT,NAMA PESERTA,SKOR,ROOM ID\n";
+        participants.forEach((p, index) => {
+            csvContent += `${index + 1},${p.student_name},${p.score || 0},${roomId}\n`;
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Hasil_Challenge_Room_${roomId}.csv`;
+        a.click();
+
+        // 4. CLEANUP: Hapus data dari Database
+        // Hapus Participants dulu karena mereka punya foreign key ke Room
+        const { error: deletePartError } = await db
+            .from('participants')
+            .delete()
+            .eq('room_id', roomId);
+
+        if (deletePartError) throw deletePartError;
+
+        // Hapus Room (Asumsi nama tabel 'rooms')
+        const { error: deleteRoomError } = await db
+            .from('rooms')
+            .delete()
+            .eq('room_id', roomId);
+
+        // Jika tabel room Anda berbeda (misal: room_id disimpan di tabel lain), sesuaikan di sini.
+
+        alert("Berhasil! Data telah didownload dan dihapus dari server.");
+        
+        // 5. Tendang Master kembali ke halaman utama karena room sudah tidak ada
+        localStorage.clear();
+        window.location.href = 'index.html';
+
+    } catch (err) {
+        console.error(err);
+        alert("Terjadi kesalahan saat proses penghapusan data: " + err.message);
+    }
+}
     </script>
 </body>
 </html>
