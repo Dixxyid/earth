@@ -13,9 +13,39 @@
         }
         .animate-bounce-short { animation: bounce-short 0.4s ease-out; }
         body { font-style: normal; }
+        
+        /* Modal Blur Effect */
+        .modal-backdrop {
+            backdrop-filter: blur(4px);
+            background-color: rgba(0, 0, 0, 0.4);
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
+
+    <div id="customModal" class="fixed inset-0 z-50 flex items-center justify-center hidden p-4 modal-backdrop">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden animate-bounce-short">
+            <div class="p-6 text-center">
+                <div class="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Konfirmasi Selesai</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">
+                    Data akan didownload dan <span class="font-bold text-red-600">dihapus permanen</span> dari database agar penyimpanan tidak penuh. Lanjutkan?
+                </p>
+            </div>
+            <div class="flex border-t border-gray-100">
+                <button onclick="closeModal()" class="flex-1 px-4 py-4 text-gray-500 font-bold hover:bg-gray-50 transition-colors border-r border-gray-100">
+                    BATAL
+                </button>
+                <button onclick="prosesDownloadDanHapus()" class="flex-1 px-4 py-4 text-red-600 font-bold hover:bg-red-50 transition-colors">
+                    YA, SELESAIKAN
+                </button>
+            </div>
+        </div>
+    </div>
 
     <div id="mainContent" class="flex items-center justify-center min-h-screen p-6">
         <div class="text-center animate-pulse text-gray-500 font-medium">
@@ -60,8 +90,8 @@
                                 </div>
                             </div>
 
-                            <div class="mt-4">
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 text-center sm:text-left">Indikator Rentang Nilai:</p>
+                            <div class="mt-4 text-center sm:text-left">
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Indikator Rentang Nilai:</p>
                                 <div class="grid grid-cols-4 sm:grid-cols-7 gap-1 text-[8px] font-bold uppercase">
                                     <div class="py-1.5 text-center bg-pink-100 text-pink-600 rounded-md border border-pink-200">0-20</div>
                                     <div class="py-1.5 text-center bg-red-100 text-red-600 rounded-md border border-red-200">21-40</div>
@@ -81,17 +111,17 @@
                                 <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center">
                                     Peserta Terhubung (<span id="participantCount" class="mx-1 text-gray-800">0</span>)
                                 </h2>
-                                <select id="sortOption" onchange="changeSort(this.value)" class="text-[10px] font-bold border rounded-md px-2 py-1 bg-gray-50 text-gray-600 outline-none focus:ring-2 focus:ring-green-500 cursor-pointer">
+                                <select id="sortOption" onchange="changeSort(this.value)" class="text-[10px] font-bold border rounded-md px-2 py-1 bg-gray-50 text-gray-600 outline-none">
                                     <option value="score">SORT BY: SKOR TERTINGGI</option>
                                     <option value="name">SORT BY: NAMA A-Z</option>
                                 </select>
                             </div>
 
                             <div id="playerList" class="grid grid-cols-1 sm:grid-cols-2 gap-3 min-h-[150px] border-2 border-dashed border-gray-100 p-4 rounded-xl bg-gray-50/50">
-                                </div>
+                            </div>
                         </div>
 
-                        <button onclick="downloadAndCleanup()" class="w-full mt-8 bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-green-100 transition-all active:scale-95 uppercase tracking-widest">
+                        <button onclick="showModal()" class="w-full mt-8 bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-green-100 transition-all active:scale-95 uppercase tracking-widest">
                             Selesaikan & Download Rekap
                         </button>
                     </div>
@@ -104,17 +134,16 @@
             }
         }
 
+        // FUNGSI MODAL
+        function showModal() { document.getElementById('customModal').classList.remove('hidden'); }
+        function closeModal() { document.getElementById('customModal').classList.add('hidden'); }
+
         async function fetchParticipants() {
             let query = db.from('participants').select('student_name, score').eq('room_id', roomId);
-            
-            if (currentSort === 'score') {
-                query = query.order('score', { ascending: false });
-            } else {
-                query = query.order('student_name', { ascending: true });
-            }
+            if (currentSort === 'score') { query = query.order('score', { ascending: false }); } 
+            else { query = query.order('student_name', { ascending: true }); }
 
             const { data, error } = await query;
-
             if (!error) {
                 document.getElementById('participantCount').innerText = data.length;
                 renderPlayerList(data);
@@ -144,7 +173,7 @@
                                 <span class="font-bold text-gray-700 truncate text-sm font-sans">${p.student_name}</span>
                             </div>
                             <div class="${getScoreStyle(score)} px-3 py-1 rounded-lg text-xs font-black border flex flex-col items-center min-w-[50px]">
-                                <span class="text-[7px] opacity-70 leading-none mb-0.5">SCORE</span>
+                                <span class="text-[7px] opacity-70 leading-none mb-0.5 uppercase">Score</span>
                                 <span>${score}</span>
                             </div>
                         </div>
@@ -154,84 +183,55 @@
         }
 
         function initRealtime() {
-            db.channel('room-updates')
-                .on('postgres_changes', { 
-                    event: '*', 
-                    schema: 'public', 
-                    table: 'participants', 
-                    filter: `room_id=eq.${roomId}` 
-                }, () => {
-                    fetchParticipants(); 
-                })
-                .subscribe();
+            db.channel('room-updates').on('postgres_changes', { event: '*', schema: 'public', table: 'participants', filter: `room_id=eq.${roomId}` }, () => { fetchParticipants(); }).subscribe();
         }
 
-       // 6. FUNGSI DOWNLOAD & CLEANUP DATABASE
-async function downloadAndCleanup() {
-    // 1. Tampilkan Konfirmasi Pop-up
-    const yakin = confirm(
-        "PERINGATAN: Apakah Anda yakin?\n\n" +
-        "1. Data hasil challenge akan didownload.\n" +
-        "2. Setelah download selesai, data Room & Peserta akan DIHAPUS PERMANEN dari database untuk menghemat ruang.\n\n" +
-        "Lanjutkan?"
-    );
+        // FUNGSI EKSEKUSI
+        async function prosesDownloadDanHapus() {
+            closeModal();
+            const container = document.getElementById('mainContent');
+            container.innerHTML = `<div class="text-center font-bold text-gray-500 animate-pulse">Sedang memproses & membersihkan database...</div>`;
 
-    if (!yakin) return;
+            try {
+                const { data: participants, error: fetchError } = await db
+                    .from('participants')
+                    .select('student_name, score')
+                    .eq('room_id', roomId)
+                    .order('score', { ascending: false });
 
-    try {
-        // 2. Ambil data terakhir untuk didownload
-        const { data: participants, error: fetchError } = await db
-            .from('participants')
-            .select('student_name, score')
-            .eq('room_id', roomId)
-            .order('score', { ascending: false });
+                if (fetchError || !participants || participants.length === 0) {
+                    alert("Gagal mengambil data atau peserta sudah kosong.");
+                    location.reload();
+                    return;
+                }
 
-        if (fetchError || !participants || participants.length === 0) {
-            alert("Gagal mengambil data atau peserta masih kosong.");
-            return;
+                // Download CSV
+                let csvContent = "PERINGKAT,NAMA PESERTA,SKOR,ROOM ID\n";
+                participants.forEach((p, index) => {
+                    csvContent += `${index + 1},${p.student_name},${p.score || 0},${roomId}\n`;
+                });
+
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Rekap_Challenge_${roomId}.csv`;
+                a.click();
+
+                // Cleanup Database
+                await db.from('participants').delete().eq('room_id', roomId);
+                await db.from('rooms').delete().eq('room_id', roomId);
+
+                alert("Data Berhasil Didownload & Database Telah Dibersihkan!");
+                localStorage.clear();
+                window.location.href = 'index.html';
+
+            } catch (err) {
+                console.error(err);
+                alert("Terjadi kesalahan teknis: " + err.message);
+                location.reload();
+            }
         }
-
-        // 3. Proses Pembuatan File (Format CSV agar mudah dibuka di Excel)
-        let csvContent = "PERINGKAT,NAMA PESERTA,SKOR,ROOM ID\n";
-        participants.forEach((p, index) => {
-            csvContent += `${index + 1},${p.student_name},${p.score || 0},${roomId}\n`;
-        });
-
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Hasil_Challenge_Room_${roomId}.csv`;
-        a.click();
-
-        // 4. CLEANUP: Hapus data dari Database
-        // Hapus Participants dulu karena mereka punya foreign key ke Room
-        const { error: deletePartError } = await db
-            .from('participants')
-            .delete()
-            .eq('room_id', roomId);
-
-        if (deletePartError) throw deletePartError;
-
-        // Hapus Room (Asumsi nama tabel 'rooms')
-        const { error: deleteRoomError } = await db
-            .from('rooms')
-            .delete()
-            .eq('room_id', roomId);
-
-        // Jika tabel room Anda berbeda (misal: room_id disimpan di tabel lain), sesuaikan di sini.
-
-        alert("Berhasil! Data telah didownload dan dihapus dari server.");
-        
-        // 5. Tendang Master kembali ke halaman utama karena room sudah tidak ada
-        localStorage.clear();
-        window.location.href = 'index.html';
-
-    } catch (err) {
-        console.error(err);
-        alert("Terjadi kesalahan saat proses penghapusan data: " + err.message);
-    }
-}
     </script>
 </body>
 </html>
