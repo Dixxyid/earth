@@ -59,7 +59,7 @@
 
         const role = localStorage.getItem('role');
         const roomId = localStorage.getItem('room_id');
-        let masterNameFromDB = ""; // Akan diisi dari database
+        let masterNameFromDB = ""; 
         let currentSort = 'score'; 
 
         if (!role || !roomId) { window.location.href = 'index.html'; }
@@ -78,7 +78,6 @@
             const container = document.getElementById('mainContent');
 
             if (role === 'master') {
-                // AMBIL NAMA MASTER DARI DATABASE TERLEBIH DAHULU
                 const { data: roomData, error: roomError } = await db
                     .from('rooms')
                     .select('master_name')
@@ -98,15 +97,14 @@
                         <div class="mb-6">
                             <h1 class="text-3xl font-extrabold text-gray-800 uppercase tracking-tight mb-4">Master Panel</h1>
                             
-                            <div class="flex flex-col gap-2 bg-gray-50 px-4 py-3 rounded-xl border border-gray-100">
-                                <div class="flex justify-between items-center">
-                                    <p class="text-gray-500 font-medium text-sm">Room ID: <span class="text-green-600 font-mono font-bold ml-1">${roomId}</span></p>
-                                    <div class="flex items-center text-green-500 font-bold text-[10px] uppercase tracking-wider">
-                                        <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-ping"></span> Live Status
-                                    </div>
+                            <div class="flex flex-wrap items-center justify-between bg-gray-50 px-4 py-3 rounded-xl border border-gray-100 gap-y-2">
+                                <div class="flex items-center space-x-4">
+                                    <p class="text-gray-500 font-medium text-xs sm:text-sm">ROOM ID: <span class="text-green-600 font-mono font-bold ml-1">${roomId}</span></p>
+                                    <span class="text-gray-300">|</span>
+                                    <p class="text-gray-500 font-medium text-xs sm:text-sm">MASTER: <span class="text-blue-600 font-bold ml-1">${masterNameFromDB}</span></p>
                                 </div>
-                                <div class="border-t border-gray-200 pt-2">
-                                    <p class="text-gray-500 font-medium text-sm">Master Room: <span class="text-blue-600 font-bold">${masterNameFromDB}</span></p>
+                                <div class="flex items-center text-green-500 font-bold text-[10px] uppercase tracking-wider">
+                                    <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-ping"></span> Live
                                 </div>
                             </div>
 
@@ -180,7 +178,7 @@
                             <span class="font-bold text-gray-700 truncate text-sm">${p.student_name}</span>
                         </div>
                         <div class="${getScoreStyle(p.score || 0)} px-3 py-1 rounded-lg text-xs font-black border flex flex-col items-center min-w-[50px]">
-                            <span class="text-[7px] opacity-70 leading-none mb-0.5 uppercase">Score</span>
+                            <span class="text-[7px] opacity-70 leading-none mb-0.5">SCORE</span>
                             <span>${p.score || 0}</span>
                         </div>
                     </div>
@@ -198,7 +196,6 @@
             container.innerHTML = `<div class="text-center font-bold text-gray-500 animate-pulse">Memproses & Membersihkan Database...</div>`;
 
             try {
-                // 1. Ambil data peserta
                 const { data: participants, error: fetchError } = await db
                     .from('participants')
                     .select('student_name, score')
@@ -211,7 +208,7 @@
                     return;
                 }
 
-                // 2. Susun CSV dengan Header Informasi Master
+                // Header CSV sesuai permintaan
                 let csvContent = `NAMA MASTER ROOM,${masterNameFromDB}\n`;
                 csvContent += `ROOM ID,${roomId}\n`;
                 csvContent += `TANGGAL DOWNLOAD,${new Date().toLocaleString('id-ID')}\n\n`;
@@ -221,16 +218,14 @@
                     csvContent += `${index + 1},${p.student_name.toUpperCase()},${p.score || 0}\n`;
                 });
 
-                // 3. Download File
                 const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                // Format Nama File: Rekap_MASTER_ID.csv
+                // Nama File: Rekap_NAMAMASTER_ROOMID.csv
                 a.download = `Rekap_${masterNameFromDB.replace(/\s+/g, '_')}_${roomId}.csv`;
                 a.click();
 
-                // 4. Hapus data dari database (Cleanup)
                 await db.from('participants').delete().eq('room_id', roomId);
                 await db.from('rooms').delete().eq('room_id', roomId);
 
