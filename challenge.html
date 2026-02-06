@@ -106,27 +106,26 @@ async function handleJoin() {
     const roomId = document.getElementById('joinRoomId').value.trim();
     const pw = document.getElementById('joinPw').value.trim();
 
-    // 1. Validasi Input Kosong
+    // 1. Validasi Input Dasar
     if(!name || !roomId || !pw) return alert("Harap isi semua kolom!");
-
-    // 2. Validasi Format Angka (4-6 Digit)
     if(!isValidCode(roomId) || !isValidCode(pw)) {
         return alert("Room ID dan Password harus berupa angka (4 - 6 digit)!");
     }
 
-    // 3. VALIDASI: Cek apakah Room ID dan Password cocok di tabel 'rooms'
+    // 2. VALIDASI ROOM & PASSWORD (TOLAK JIKA TIDAK COCOK)
     const { data: roomData, error: roomError } = await db
         .from('rooms')
-        .select('room_id')
+        .select('room_id, password')
         .eq('room_id', roomId)
-        .eq('password', pw)
+        .eq('password', pw) // Password langsung dicek di sini
         .maybeSingle();
 
     if (!roomData) {
-        return alert("Room ID atau Password salah!");
+        // Jika Room tidak ketemu ATAU Password salah, akses ditolak
+        return alert("AKSES DITOLAK: Room ID atau Password salah!");
     }
 
-    // 4. CEK: Apakah nama ini sudah terdaftar di room tersebut?
+    // 3. CEK APAKAH PESERTA SUDAH TERDAFTAR (UNTUK RE-ENTRY)
     const { data: existingPart, error: partCheckError } = await db
         .from('participants')
         .select('*')
@@ -135,11 +134,11 @@ async function handleJoin() {
         .maybeSingle();
 
     if (existingPart) {
-        // Jika sudah ada, langsung masuk tanpa insert lagi
-        console.log("Peserta sudah terdaftar, mengalihkan...");
+        // Jika nama + room_id sudah ada, anggap sebagai login ulang
+        console.log("Nama sudah terdaftar di room ini, masuk sebagai user lama...");
         lanjutKeWaitingRoom('participant', roomId, name);
     } else {
-        // 5. PENCATATAN: Jika belum ada, baru masukkan ke tabel 'participants'
+        // 4. DAFTARKAN PESERTA BARU
         const { error: partInsertError } = await db
             .from('participants')
             .insert([{ room_id: roomId, student_name: name }]);
@@ -147,7 +146,7 @@ async function handleJoin() {
         if (!partInsertError) {
             lanjutKeWaitingRoom('participant', roomId, name);
         } else {
-            alert("Gagal bergabung: " + partInsertError.message);
+            alert("Gagal mendaftar: " + partInsertError.message);
         }
     }
 }
