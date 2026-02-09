@@ -3,81 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Futuristic Feedback | Mission Control</title>
+    <title>Sistem Transmisi Laporan | Supabase Integrated</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --primary: #00f2fe;
             --secondary: #4facfe;
             --accent-yellow: #ffdf00;
-            --bg-overlay: rgba(11, 13, 23, 0.7); /* Overlay untuk menjaga legibilitas */
-            --glass: rgba(255, 255, 255, 0.08);
+            --bg-overlay: rgba(7, 9, 15, 0.8); 
+            --glass: rgba(255, 255, 255, 0.07);
         }
 
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Inter', -apple-system, sans-serif;
-            /* Update Background ke Gambar */
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            /* Path gambar sesuai permintaan */
             background: linear-gradient(var(--bg-overlay), var(--bg-overlay)), 
-                        url('materials\bg_feedback.jpg') no-repeat center center fixed;
+                        url('material/bg_feedback.jpg') no-repeat center center fixed;
             background-size: cover;
             color: white;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            overflow: hidden;
-        }
-
-        /* Floating Orb - Dipertahankan untuk kedalaman visual */
-        .orb {
-            position: absolute;
-            width: 400px;
-            height: 400px;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            filter: blur(100px);
-            border-radius: 50%;
-            z-index: -1;
-            opacity: 0.2;
-            animation: float 12s infinite alternate ease-in-out;
-        }
-
-        @keyframes float {
-            from { transform: translate(-10%, -10%); }
-            to { transform: translate(10%, 10%); }
         }
 
         .feedback-card {
             background: var(--glass);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             padding: 40px;
-            border-radius: 28px;
-            width: 100%;
+            border-radius: 24px;
+            width: 90%;
             max-width: 400px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.6);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
             text-align: center;
-            transition: transform 0.3s ease;
-        }
-
-        .feedback-card:hover {
-            border-color: rgba(0, 242, 254, 0.3);
         }
 
         h2 { 
             margin: 0 0 10px 0; 
-            font-weight: 800; 
-            letter-spacing: 3px; 
-            font-size: 1.4rem;
-            background: linear-gradient(to right, #fff, var(--primary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            letter-spacing: 4px; 
+            text-transform: uppercase;
+            color: var(--primary);
+            filter: drop-shadow(0 0 8px rgba(0, 242, 254, 0.5));
         }
 
-        p { color: rgba(255, 255, 255, 0.7); font-size: 0.9rem; margin-bottom: 30px; }
+        .description { 
+            color: rgba(255, 255, 255, 0.6); 
+            font-size: 0.85rem; 
+            margin-bottom: 30px;
+        }
 
-        /* Rating Stars */
         .rating-group {
             display: flex;
             justify-content: center;
@@ -87,81 +65,65 @@
 
         .star {
             cursor: pointer;
-            font-size: 2.5rem;
+            font-size: 2.3rem;
             color: rgba(255, 255, 255, 0.1);
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            user-select: none;
-        }
-
-        .star:hover {
-            transform: scale(1.1);
-            color: rgba(255, 223, 0, 0.4);
+            transition: 0.3s ease;
         }
 
         .star.active {
             color: var(--accent-yellow);
-            text-shadow: 0 0 20px rgba(255, 223, 0, 0.8);
-            transform: scale(1.2);
+            text-shadow: 0 0 15px rgba(255, 223, 0, 0.8);
+            transform: scale(1.1);
         }
 
-        /* Input Styles */
         .input-field {
             width: 100%;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.5);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 14px;
-            padding: 14px 18px;
+            border-radius: 12px;
+            padding: 14px;
             color: white;
             box-sizing: border-box;
             margin-bottom: 15px;
+            outline: none;
             transition: 0.3s;
-            font-size: 0.95rem;
-        }
-
-        .input-field::placeholder {
-            color: rgba(255, 255, 255, 0.3);
         }
 
         .input-field:focus {
-            outline: none;
             border-color: var(--primary);
-            background: rgba(0, 242, 254, 0.05);
-            box-shadow: 0 0 15px rgba(0, 242, 254, 0.15);
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
         }
 
         button {
             width: 100%;
             padding: 16px;
             border: none;
-            border-radius: 14px;
-            background: linear-gradient(45deg, var(--secondary), var(--primary));
+            border-radius: 12px;
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
             color: #0b0d17;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
             cursor: pointer;
-            transition: 0.4s;
-            margin-top: 10px;
+            transition: 0.3s;
         }
 
-        button:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 25px rgba(0, 242, 254, 0.5);
-            filter: saturate(1.2) brightness(1.1);
+        button:disabled {
+            filter: grayscale(1);
+            cursor: not-allowed;
         }
 
-        button:active {
-            transform: translateY(-1px);
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 242, 254, 0.4);
         }
     </style>
 </head>
 <body>
 
-    <div class="orb"></div>
-
     <div class="feedback-card">
-        <h2>TRANSMIT DATA</h2>
-        <p>Hubungkan frekuensi Anda ke pusat kendali.</p>
+        <h2>FEEDBACK DATA</h2>
+        <p class="description">Terima kasih telah menjadi bagian dari perjalanan awal CUBOAR. Namun kami butuh mata tambahan untuk melihat hal-hal yang mungkin terlewat. Jika kamu menemukan bug, error, atau merasa ada bagian yang membingungkan, tolong jelaskan di bawah ini. Terima kasih telah membantu kami membangun aplikasi yang lebih solid dan stabil.</p>
 
         <div class="rating-group" id="ratingGroup">
             <span class="star" data-value="1">★</span>
@@ -171,61 +133,75 @@
             <span class="star" data-value="5">★</span>
         </div>
 
-        <input type="email" id="userEmail" class="input-field" placeholder="ID Email (user@cosmos.com)" required>
-        
-        <textarea id="userMessage" class="input-field" rows="4" placeholder="Enkripsi pesan Anda di sini..."></textarea>
+        <input type="email" id="email" class="input-field" placeholder="ID Protokol (Email)" required>
+        <textarea id="isi_feedback" class="input-field" rows="4" placeholder="Detail laporan transmisi..."></textarea>
 
-        <button onclick="handleSubmit()">Inisiasi Pengiriman</button>
+        <button id="btnSubmit" onclick="sendToSupabase()">Kirim Laporan</button>
     </div>
 
     <script>
+        // --- KONFIGURASI SUPABASE ---
+        // Ganti dengan URL dan Anon Key proyek Supabase Anda
+        const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
+        const SUPABASE_KEY = 'YOUR_ANON_KEY';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Logika Rating Bintang
         const stars = document.querySelectorAll('.star');
         let currentRating = 0;
 
-        stars.forEach((star, index) => {
+        stars.forEach(star => {
             star.addEventListener('click', () => {
-                currentRating = index + 1;
-                updateStars();
+                currentRating = star.getAttribute('data-value');
+                stars.forEach(s => {
+                    s.classList.toggle('active', s.getAttribute('data-value') <= currentRating);
+                });
             });
         });
 
-        function updateStars() {
-            stars.forEach((s, i) => {
-                i < currentRating ? s.classList.add('active') : s.classList.remove('active');
-            });
-        }
+        // Fungsi Kirim ke Supabase
+        async function sendToSupabase() {
+            const emailInput = document.getElementById('email').value;
+            const feedbackInput = document.getElementById('isi_feedback').value;
+            const btn = document.getElementById('btnSubmit');
 
-        function handleSubmit() {
-            const email = document.getElementById('userEmail').value;
-            const message = document.getElementById('userMessage').value;
-
-            if (!currentRating) {
-                alert('Peringatan: Berikan penilaian bintang sebelum transmisi.');
+            // Validasi Sederhana
+            if (!currentRating || !emailInput || !feedbackInput) {
+                alert('Sistem: Data tidak lengkap. Pastikan Rating, Email, dan Feedback terisi.');
                 return;
             }
 
-            if (!email.includes('@')) {
-                alert('Peringatan: Alamat email tidak valid.');
-                return;
-            }
-
-            // Simulasi pengiriman
-            const btn = document.querySelector('button');
-            btn.innerText = 'MENGIRIM...';
-            btn.style.opacity = '0.7';
             btn.disabled = true;
+            btn.innerText = 'PROSES TRANSMISI...';
 
-            setTimeout(() => {
-                alert('Suksess! Transmisi terkirim ke sektor ' + (currentRating * 100) + '. Terima kasih, Agent.');
-                // Reset form
-                document.getElementById('userEmail').value = '';
-                document.getElementById('userMessage').value = '';
+            try {
+                const { data, error } = await supabase
+                    .from('feedback') // Nama tabel di Supabase
+                    .insert([
+                        { 
+                            email: emailInput, 
+                            isi_feedback: feedbackInput, 
+                            rating: parseInt(currentRating) 
+                        }
+                    ]);
+
+                if (error) throw error;
+
+                alert('Sistem: Transmisi Berhasil! Data telah tersimpan di Supabase.');
+                
+                // Reset Form
+                document.getElementById('email').value = '';
+                document.getElementById('isi_feedback').value = '';
                 currentRating = 0;
-                updateStars();
-                btn.innerText = 'Inisiasi Pengiriman';
-                btn.style.opacity = '1';
+                stars.forEach(s => s.classList.remove('active'));
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Sistem Kegagalan: ' + error.message);
+            } finally {
                 btn.disabled = false;
-            }, 1500);
+                btn.innerText = 'Kirim Laporan';
+            }
         }
     </script>
 </body>
