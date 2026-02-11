@@ -1,33 +1,56 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Navigation Buttons</title>
+    <title>Augmented Reality Portal</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/your-code.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="main-wrapper">
+        <header>
+            <h1>Augmented <span>Reality</span></h1>
+            <p>Jelajahi dunia digital dalam genggaman Anda</p>
+        </header>
+
+        <nav class="nav-grid">
+            <button class="nav-card start" onclick="navigateTo('starts.html')">
+                <span class="icon">🚀</span>
+                <span class="label">Mulai</span>
+            </button>
+            <button class="nav-card guide" onclick="navigateTo('guides.html')">
+                <span class="icon">📖</span>
+                <span class="label">Panduan</span>
+            </button>
+            <button class="nav-card markers" onclick="navigateTo('ar_markers.html')">
+                <span class="icon">🎯</span>
+                <span class="label">Marker</span>
+            </button>
+            <button class="nav-card quiz" onclick="navigateTo('quiz.html')">
+                <span class="icon">💡</span>
+                <span class="label">Kuis</span>
+            </button>
+            <button class="nav-card learning" onclick="navigateTo('learning.html')">
+                <span class="icon">🎓</span>
+                <span class="label">Belajar</span>
+            </button>
+            <button class="nav-card about" onclick="navigateTo('about.html')">
+                <span class="icon">ℹ️</span>
+                <span class="label">Tentang</span>
+            </button>
+            <button class="nav-card feedback" onclick="navigateTo('feedback.html')">
+                <span class="icon">💬</span>
+                <span class="label">Umpan Balik</span>
+            </button>
+        </nav>
+    </div>
+
     <script>
         function navigateTo(page) {
             window.location.href = page;
         }
     </script>
-</head>
-<body>
-    <div class="container">
-        <h1>Augmented Reality</h1>
-        <div class="nav-container">
-            <button class="nav-button start" onclick="navigateTo('starts.html')">Start</button>
-            <button class="nav-button guide" onclick="navigateTo('guides.html')">Guides</button>
-            <button class="nav-button pilih-gambar" onclick="navigateTo('ar_markers.html')">Markers</button>
-            <button class="nav-button quiz" onclick="navigateTo('quiz.html')">Quiz</button>
-            <button class="nav-button learning" onclick="navigateTo('learning.html')">Learning</button>
-            <button class="nav-button source" onclick="navigateTo('about.html')">About</button>
-            <button class="nav-button feedback" onclick="navigateTo('feedback.html')">Feedback</button>
-        </div>
-    </div>
 </body>
 </html>
-
-
-
-
-
