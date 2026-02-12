@@ -19,6 +19,7 @@ body {
 .container {
     width: 100%;
     max-width: 450px;
+    margin-top: 25px;
 }
 
 /* --- HEADER --- */
@@ -265,3 +266,4 @@ button {
     .stars-static { font-size: 1.2rem; }
     .rating-stats { padding: 1rem; }
 }
+
