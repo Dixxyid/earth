@@ -73,10 +73,58 @@
             </button>
         </div>
     </div>
+    <div class="rating-stats" id="ratingStats" style="display: none;"> <div class="rating-score">
+        <span id="avgRating" class="score-value">0.0</span>
+        <div class="stars-static">
+            ★★★★★
+            <div id="starFill" class="stars-active" style="width: 0%;">★★★★★</div>
+        </div>
+    </div>
+    <p id="reviewCount" class="total-reviews">Memuat ulasan...</p>
+</div>
 </div>
 
 <script>
-    function navigateTo(url) {
+
+    // Pastikan library Supabase sudah ada di header (seperti di file feedback kamu)
+const SUPABASE_URL = 'https://bmswsgtgxmijjomkltzx.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJtc3dzZ3RneG1pampvbWtsdHp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyOTc5MDIsImV4cCI6MjA4NTg3MzkwMn0.tudVaH1BpfQA2h6EhWv2ekmhAPMTgDhiEKRbvCOM074';
+const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+async function loadRatingStats() {
+    try {
+        // 1. Ambil semua data rating dari kolom 'rating'
+        const { data, error, count } = await _supabase
+            .from('feedback')
+            .select('rating', { count: 'exact' });
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+            // 2. Hitung total rating
+            const totalScore = data.reduce((acc, curr) => acc + curr.rating, 0);
+            
+            // 3. Hitung rata-rata (1 angka di belakang koma)
+            const average = (totalScore / data.length).toFixed(1);
+            
+            // 4. Hitung persentase untuk lebar bintang (misal: 4.5 / 5 * 100 = 90%)
+            const starPercentage = (average / 5) * 100;
+
+            // 5. Update tampilan
+            document.getElementById('avgRating').innerText = average;
+            document.getElementById('reviewCount').innerText = `Berdasarkan ${data.length} Ulasan`;
+            document.getElementById('starFill').style.width = `${starPercentage}%`;
+            document.getElementById('ratingStats').style.display = 'block';
+        }
+    } catch (err) {
+        console.error('Gagal memuat statistik:', err.message);
+    }
+}
+
+// Jalankan fungsi saat halaman dibuka
+window.onload = loadRatingStats;
+
+        function navigateTo(url) {
         // Menambahkan sedikit efek delay agar user bisa melihat animasi tombol saat ditekan
         setTimeout(() => {
             window.location.href = url;
@@ -86,3 +134,4 @@
 
 </body>
 </html>
+
