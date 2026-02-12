@@ -1,134 +1,136 @@
-/* Reset dan Variabel Warna */
-:root {
-    --bg-dark: #0f172a;
-    --primary-blue: #3b82f6;
-    --secondary-blue: #2563eb;
-    --card-bg: #1e293b;
-    --text-main: #f8fafc;
-    --text-dim: #94a3b8;
-}
-
+/* Reset & Base Styles */
 * {
-    box-sizing: border-box;
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 
 body {
     font-family: 'Plus Jakarta Sans', sans-serif;
-    background-color: var(--bg-dark);
-    color: var(--text-main);
+    background: radial-gradient(circle at center, #1a1a2e 0%, #0f0f1a 100%);
+    color: #ffffff;
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    padding: 20px;
+    overflow-x: hidden;
 }
 
 .container {
     width: 100%;
-    max-width: 450px; /* Ukuran optimal untuk simetri mobile-first */
+    max-width: 500px;
+    padding: 2rem;
+    text-align: center;
 }
 
+/* Header Section */
 .header {
-    text-align: center;
-    margin-bottom: 35px;
+    margin-bottom: 3rem;
 }
 
 .header h1 {
-    font-size: 2rem;
     font-weight: 800;
-    letter-spacing: 1px;
+    font-size: 2.5rem;
+    letter-spacing: -1px;
+    line-height: 1;
 }
 
 .header h1 span {
-    color: var(--primary-blue);
+    display: block;
+    background: linear-gradient(90deg, #00d2ff 0%, #928dab 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .header p {
+    margin-top: 10px;
+    color: #a0a0c0;
     font-size: 0.95rem;
-    color: var(--text-dim);
-    margin-top: 5px;
+    font-weight: 400;
 }
 
+/* Menu Wrapper */
 .menu-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 1.5rem;
 }
 
-/* Tombol Start: Lebar Penuh agar Center */
+/* Main Button (Mulai Sekarang) */
 .btn-main {
-    background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+    background: linear-gradient(135deg, #0061ff 0%, #60efff 100%);
     border: none;
-    border-radius: 18px;
-    padding: 22px;
+    padding: 1.5rem;
+    border-radius: 20px;
     color: white;
-    cursor: pointer;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 18px;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4);
-    width: 100%;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 10px 20px rgba(0, 97, 255, 0.3);
 }
 
 .btn-main:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.5);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 97, 255, 0.5);
 }
 
-.btn-main .icon-large { font-size: 2.2rem; }
-.btn-main .text-box { text-align: left; }
-.btn-main .title { display: block; font-weight: 800; font-size: 1.1rem; }
-.btn-main .subtitle { font-size: 0.8rem; opacity: 0.9; }
+.btn-icon {
+    font-size: 2.5rem;
+    margin-right: 1.2rem;
+}
 
-/* Grid 6 Tombol: 2 Kolom Seimbang */
+.btn-text {
+    text-align: left;
+}
+
+.btn-text .title {
+    display: block;
+    font-weight: 800;
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+}
+
+.btn-text .subtitle {
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+
+/* Grid Buttons (Sub Buttons) */
 .btn-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
 }
 
 .btn-sub {
-    background: var(--card-bg);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1.2rem 1rem;
     border-radius: 16px;
-    padding: 20px 10px;
-    color: white;
+    color: #e0e0ff;
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     cursor: pointer;
+    transition: all 0.2s ease;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
-    transition: all 0.25s ease;
+    gap: 8px;
 }
 
 .btn-sub:hover {
-    background: #2d3a4f;
-    border-color: var(--primary-blue);
-    transform: translateY(-3px);
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #00d2ff;
+    transform: scale(1.03);
 }
 
-.btn-sub span {
-    font-size: 1.6rem;
+.icon-small {
+    font-size: 1.5rem;
 }
 
-/* Feedback Klik */
-button:active {
-    transform: scale(0.95) !important;
-}
-
-/* Responsif untuk layar sangat kecil */
-@media (max-width: 360px) {
-    .btn-grid {
-        gap: 10px;
-    }
-    .header h1 {
-        font-size: 1.6rem;
-    }
+/* Responsive adjustment */
+@media (max-width: 400px) {
+    .header h1 { font-size: 2rem; }
+    .btn-grid { grid-template-columns: 1fr; }
 }
