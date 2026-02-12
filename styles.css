@@ -1,98 +1,134 @@
+/* Reset dan Variabel Warna */
 :root {
-    --primary-color: #2563eb;
-    --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    --card-bg: rgba(255, 255, 255, 0.05);
-    --text-color: #f8fafc;
+    --bg-dark: #0f172a;
+    --primary-blue: #3b82f6;
+    --secondary-blue: #2563eb;
+    --card-bg: #1e293b;
+    --text-main: #f8fafc;
+    --text-dim: #94a3b8;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Inter', sans-serif;
-    background: var(--bg-gradient);
-    min-height: 100vh;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
     display: flex;
     justify-content: center;
     align-items: center;
-    color: var(--text-color);
+    min-height: 100vh;
+    padding: 20px;
 }
 
-.main-wrapper {
-    width: 90%;
-    max-width: 800px;
+.container {
+    width: 100%;
+    max-width: 450px; /* Ukuran optimal untuk simetri mobile-first */
+}
+
+.header {
     text-align: center;
+    margin-bottom: 35px;
 }
 
-header h1 {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
-    letter-spacing: -1px;
+.header h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: 1px;
 }
 
-header h1 span {
-    color: var(--primary-color);
+.header h1 span {
+    color: var(--primary-blue);
 }
 
-header p {
-    opacity: 0.7;
-    margin-bottom: 3rem;
+.header p {
+    font-size: 0.95rem;
+    color: var(--text-dim);
+    margin-top: 5px;
 }
 
-/* Grid Layout */
-.nav-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 1.5rem;
+.menu-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
-/* Button Card Style */
-.nav-card {
-    background: var(--card-bg);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 2rem 1rem;
-    border-radius: 16px;
+/* Tombol Start: Lebar Penuh agar Center */
+.btn-main {
+    background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+    border: none;
+    border-radius: 18px;
+    padding: 22px;
+    color: white;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4);
+    width: 100%;
+}
+
+.btn-main:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.5);
+}
+
+.btn-main .icon-large { font-size: 2.2rem; }
+.btn-main .text-box { text-align: left; }
+.btn-main .title { display: block; font-weight: 800; font-size: 1.1rem; }
+.btn-main .subtitle { font-size: 0.8rem; opacity: 0.9; }
+
+/* Grid 6 Tombol: 2 Kolom Seimbang */
+.btn-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.btn-sub {
+    background: var(--card-bg);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 20px 10px;
+    color: white;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 10px;
-    color: white;
+    transition: all 0.25s ease;
 }
 
-.nav-card:hover {
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateY(-5px);
-    border-color: var(--primary-color);
-    box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
+.btn-sub:hover {
+    background: #2d3a4f;
+    border-color: var(--primary-blue);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
 }
 
-.nav-card .icon {
-    font-size: 2rem;
+.btn-sub span {
+    font-size: 1.6rem;
 }
 
-.nav-card .label {
-    font-weight: 600;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+/* Feedback Klik */
+button:active {
+    transform: scale(0.95) !important;
 }
 
-/* Spesifik warna untuk tombol 'Start' agar menonjol */
-.nav-card.start {
-    background: var(--primary-color);
-    border: none;
-}
-
-.nav-card.start:hover {
-    background: #1d4ed8;
-}
-
-/* Responsif Mobile */
-@media (max-width: 480px) {
-    .nav-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
+/* Responsif untuk layar sangat kecil */
+@media (max-width: 360px) {
+    .btn-grid {
+        gap: 10px;
+    }
+    .header h1 {
+        font-size: 1.6rem;
     }
 }
-
