@@ -8,51 +8,72 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <header class="header">
-            <h1>AUGMENTED <span>REALITY</span></h1>
-            <p>Jelajahi dunia digital dan pengalaman interaktif</p>
-        </header>
+<div class="container">
+    <header class="header">
+        <h1>AUGMENTED <span>REALITY</span></h1>
+        <p>Jelajahi dunia digital dan pengalaman interaktif</p>
+    </header>
 
-        <div class="menu-wrapper">
-            <button class="btn-main" onclick="navigateTo('starts.html')">
-                <span class="btn-icon">🚀</span>
-                <div class="btn-text">
-                    <span class="title">MULAI SEKARANG</span>
-                    <span class="subtitle">Masuk ke mode AR Kamera</span>
+    <div class="menu-wrapper">
+        <button class="btn-main" onclick="navigateTo('starts.html')">
+            <span class="icon-main">🚀</span>
+            <div class="btn-text-main">
+                <span class="title">MULAI SEKARANG</span>
+                <span class="subtitle">Enter AR Camera Mode</span>
+            </div>
+        </button>
+
+        <div class="btn-grid">
+            <button class="btn-sub" onclick="navigateTo('guides.html')">
+                <span class="icon-small">📖</span>
+                <div class="btn-content">
+                    <span class="txt-id">Panduan</span>
+                    <span class="txt-en">Guide</span>
                 </div>
             </button>
 
-            <div class="btn-grid">
-                <button class="btn-sub" onclick="navigateTo('guides.html')">
-                    <span class="icon-small">📖</span> Panduan
-                </button>
-                <button class="btn-sub" onclick="navigateTo('ar_markers.html')">
-                    <span class="icon-small">🎯</span> Marker
-                </button>
-                <button class="btn-sub" onclick="navigateTo('quiz.html')">
-                    <span class="icon-small">💡</span> Kuis
-                </button>
-                <button class="btn-sub" onclick="navigateTo('learning.html')">
-                    <span class="icon-small">📋</span> Materi
-                </button>
-                <button class="btn-sub" onclick="navigateTo('about.html')">
-                    <span class="icon-small">ℹ️</span> Tentang
-                </button>
-                <button class="btn-sub" onclick="navigateTo('feedback.html')">
-                    <span class="icon-small">⭐</span> Ulasan
-                </button>
-            </div>
+            <button class="btn-sub" onclick="navigateTo('ar_markers.html')">
+                <span class="icon-small">🎯</span>
+                <div class="btn-content">
+                    <span class="txt-id">Marker</span>
+                    <span class="txt-en">AR Marker</span>
+                </div>
+            </button>
+
+            <button class="btn-sub" onclick="navigateTo('quiz.html')">
+                <span class="icon-small">💡</span>
+                <div class="btn-content">
+                    <span class="txt-id">Kuis</span>
+                    <span class="txt-en">Quiz</span>
+                </div>
+            </button>
+
+            <button class="btn-sub" onclick="navigateTo('learning.html')">
+                <span class="icon-small">📋</span>
+                <div class="btn-content">
+                    <span class="txt-id">Materi</span>
+                    <span class="txt-en">Learning Material</span>
+                </div>
+            </button>
+
+            <button class="btn-sub" onclick="navigateTo('about.html')">
+                <span class="icon-small">ℹ️</span>
+                <div class="btn-content">
+                    <span class="txt-id">Tentang</span>
+                    <span class="txt-en">About Us</span>
+                </div>
+            </button>
+
+            <button class="btn-sub" onclick="navigateTo('feedback.html')">
+                <span class="icon-small">⭐</span>
+                <div class="btn-content">
+                    <span class="txt-id">Ulasan</span>
+                    <span class="txt-en">Feedback</span>
+                </div>
+            </button>
         </div>
     </div>
-
-    <script>
-        function navigateTo(page) {
-            window.location.href = page;
-        }
-    </script>
-</body>
-</html>
+</div>        
 
 
 
