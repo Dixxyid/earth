@@ -19,7 +19,7 @@ body {
 .container {
     width: 100%;
     max-width: 450px;
-    margin-top: 25px;
+    padding-top: 25px;
 }
 
 /* --- HEADER --- */
@@ -215,7 +215,8 @@ button {
     background: linear-gradient(90deg, #00d2ff, #3a7bd5);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.3));
+    /* Ganti ke drop-shadow agar lebih halus dan tidak kotak */
+    filter: drop-shadow(0 0 15px rgba(0, 210, 255, 0.4));
 }
 
 .stars-static {
@@ -225,17 +226,21 @@ button {
     color: rgba(255, 255, 255, 0.1);
     letter-spacing: 4px;
     margin: 8px 0;
+        /* Memberi ruang agar shadow tidak terpotong (overflow) */
+    padding: 10px 5px;
 }
 
 .stars-active {
     position: absolute;
-    top: 0;
+    top: 10;
     left: 0;
     white-space: nowrap;
     overflow: hidden;
     color: #ffdf00;
-    text-shadow: 0 0 15px rgba(255, 223, 0, 0.5);
+   /* Gunakan filter drop-shadow pada elemen teks, bukan box-shadow */
+    filter: drop-shadow(0 0 8px rgba(255, 223, 0, 0.8));
     transition: width 1.5s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+    pointer-events: none;
 }
 
 .total-reviews {
@@ -266,4 +271,5 @@ button {
     .stars-static { font-size: 1.2rem; }
     .rating-stats { padding: 1rem; }
 }
+
 
