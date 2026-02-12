@@ -1,4 +1,3 @@
-/* Reset & Base Styles */
 * {
     margin: 0;
     padding: 0;
@@ -21,7 +20,6 @@ body {
     max-width: 450px;
 }
 
-/* Header Section */
 .header {
     text-align: center;
     margin-bottom: 2.5rem;
@@ -30,8 +28,6 @@ body {
 .header h1 {
     font-weight: 800;
     font-size: 2.2rem;
-    line-height: 1.1;
-    letter-spacing: -1px;
 }
 
 .header h1 span {
@@ -42,45 +38,54 @@ body {
 }
 
 .header p {
-    margin-top: 8px;
     color: #6a6a8e;
     font-size: 0.9rem;
+    margin-top: 5px;
 }
 
-/* Menu Wrapper */
-.menu-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-/* Main Button (Mulai Sekarang) */
+/* TOMBOL UTAMA (1) */
 .btn-main {
+    width: 100%;
     background: linear-gradient(135deg, #0061ff 0%, #60efff 100%);
     border: none;
     padding: 1.5rem;
     border-radius: 20px;
     color: white;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
     display: flex;
     align-items: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 10px 20px rgba(0, 97, 255, 0.2);
-    margin-bottom: 0.5rem;
+    justify-content: center; /* Center teks */
+    margin-bottom: 1rem;
+    transition: 0.3s;
 }
 
-.btn-main:active { transform: scale(0.98); }
-
-.btn-icon {
-    font-size: 2rem;
-    margin-right: 1rem;
+.icon-main {
+    position: absolute;
+    left: 15px; /* Pojok kiri */
+    font-size: 3rem;
+    opacity: 1; /* Tidak transparan */
 }
 
-.btn-text { text-align: left; }
-.btn-text .title { display: block; font-weight: 800; font-size: 1.1rem; }
-.btn-text .subtitle { font-size: 0.8rem; opacity: 0.8; }
+.btn-text-main {
+    text-align: center;
+    z-index: 1;
+}
 
-/* Grid Buttons (Sub Buttons 2-7) */
+.btn-text-main .title {
+    display: block;
+    font-weight: 800;
+    font-size: 1.2rem;
+}
+
+.btn-text-main .subtitle {
+    font-size: 0.8rem;
+    font-style: italic;
+    opacity: 0.8;
+}
+
+/* GRID TOMBOL (2-7) */
 .btn-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -89,49 +94,52 @@ body {
 
 .btn-sub {
     background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 1.5rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1.5rem 0.5rem;
     border-radius: 18px;
     color: #ffffff;
-    font-weight: 600;
-    font-size: 1rem;
     cursor: pointer;
-    transition: all 0.3s ease;
-    
-    /* Penting untuk posisi icon di pojok */
     position: relative;
-    overflow: hidden; 
+    overflow: hidden;
     display: flex;
-    align-items: flex-end; /* Teks di bawah */
-    justify-content: flex-end; /* Teks di kanan bawah */
-    min-height: 90px;
-    text-align: right;
+    align-items: center;
+    justify-content: center; /* Center teks */
+    min-height: 100px;
+    transition: 0.3s;
 }
 
-/* Icon transparan memenuhi pojok kiri */
+/* Icon Pojok Kiri Transparan 40% */
 .icon-small {
     position: absolute;
-    top: -5px;
     left: -10px;
-    font-size: 4rem; /* Ukuran besar memenuhi tombol */
-    opacity: 0.4;   /* Transparansi 40% */
-    transform: rotate(-15deg); /* Sedikit miring agar artistik */
+    top: -5px;
+    font-size: 4rem;
+    opacity: 0.4; /* Transparan 40% */
+    transform: rotate(-15deg);
     pointer-events: none;
 }
 
+.btn-content {
+    text-align: center; /* Teks center */
+    z-index: 1;
+}
+
+.txt-id {
+    display: block;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.txt-en {
+    display: block;
+    font-size: 0.75rem;
+    font-style: italic;
+    color: #00d2ff; /* Warna berbeda untuk membedakan bahasa */
+    margin-top: 2px;
+}
+
 .btn-sub:hover {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(0, 210, 255, 0.5);
+    background: rgba(255, 255, 255, 0.1);
     transform: translateY(-3px);
-}
-
-.btn-sub:hover .icon-small {
-    opacity: 0.6;
-    transform: rotate(0deg) scale(1.1);
-    transition: all 0.3s ease;
-}
-
-/* Responsif untuk layar sangat kecil */
-@media (max-width: 360px) {
-    .btn-grid { grid-template-columns: 1fr; }
+    border-color: #00d2ff;
 }
