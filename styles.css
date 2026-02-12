@@ -7,53 +7,51 @@
 
 body {
     font-family: 'Plus Jakarta Sans', sans-serif;
-    background: radial-gradient(circle at center, #1a1a2e 0%, #0f0f1a 100%);
+    background: radial-gradient(circle at center, #1a1a2e 0%, #080810 100%);
     color: #ffffff;
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow-x: hidden;
+    padding: 20px;
 }
 
 .container {
     width: 100%;
-    max-width: 500px;
-    padding: 2rem;
-    text-align: center;
+    max-width: 450px;
 }
 
 /* Header Section */
 .header {
-    margin-bottom: 3rem;
+    text-align: center;
+    margin-bottom: 2.5rem;
 }
 
 .header h1 {
     font-weight: 800;
-    font-size: 2.5rem;
+    font-size: 2.2rem;
+    line-height: 1.1;
     letter-spacing: -1px;
-    line-height: 1;
 }
 
 .header h1 span {
     display: block;
-    background: linear-gradient(90deg, #00d2ff 0%, #928dab 100%);
+    background: linear-gradient(90deg, #00d2ff, #3a7bd5);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
 .header p {
-    margin-top: 10px;
-    color: #a0a0c0;
-    font-size: 0.95rem;
-    font-weight: 400;
+    margin-top: 8px;
+    color: #6a6a8e;
+    font-size: 0.9rem;
 }
 
 /* Menu Wrapper */
 .menu-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
 }
 
 /* Main Button (Mulai Sekarang) */
@@ -66,37 +64,23 @@ body {
     display: flex;
     align-items: center;
     cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: 0 10px 20px rgba(0, 97, 255, 0.3);
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 20px rgba(0, 97, 255, 0.2);
+    margin-bottom: 0.5rem;
 }
 
-.btn-main:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(0, 97, 255, 0.5);
-}
+.btn-main:active { transform: scale(0.98); }
 
 .btn-icon {
-    font-size: 2.5rem;
-    margin-right: 1.2rem;
+    font-size: 2rem;
+    margin-right: 1rem;
 }
 
-.btn-text {
-    text-align: left;
-}
+.btn-text { text-align: left; }
+.btn-text .title { display: block; font-weight: 800; font-size: 1.1rem; }
+.btn-text .subtitle { font-size: 0.8rem; opacity: 0.8; }
 
-.btn-text .title {
-    display: block;
-    font-weight: 800;
-    font-size: 1.2rem;
-    letter-spacing: 1px;
-}
-
-.btn-text .subtitle {
-    font-size: 0.85rem;
-    opacity: 0.9;
-}
-
-/* Grid Buttons (Sub Buttons) */
+/* Grid Buttons (Sub Buttons 2-7) */
 .btn-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -105,32 +89,49 @@ body {
 
 .btn-sub {
     background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 1.2rem 1rem;
-    border-radius: 16px;
-    color: #e0e0ff;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 1.5rem 1rem;
+    border-radius: 18px;
+    color: #ffffff;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 1rem;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
+    
+    /* Penting untuk posisi icon di pojok */
+    position: relative;
+    overflow: hidden; 
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
+    align-items: flex-end; /* Teks di bawah */
+    justify-content: flex-end; /* Teks di kanan bawah */
+    min-height: 90px;
+    text-align: right;
+}
+
+/* Icon transparan memenuhi pojok kiri */
+.icon-small {
+    position: absolute;
+    top: -5px;
+    left: -10px;
+    font-size: 4rem; /* Ukuran besar memenuhi tombol */
+    opacity: 0.4;   /* Transparansi 40% */
+    transform: rotate(-15deg); /* Sedikit miring agar artistik */
+    pointer-events: none;
 }
 
 .btn-sub:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: #00d2ff;
-    transform: scale(1.03);
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(0, 210, 255, 0.5);
+    transform: translateY(-3px);
 }
 
-.icon-small {
-    font-size: 1.5rem;
+.btn-sub:hover .icon-small {
+    opacity: 0.6;
+    transform: rotate(0deg) scale(1.1);
+    transition: all 0.3s ease;
 }
 
-/* Responsive adjustment */
-@media (max-width: 400px) {
-    .header h1 { font-size: 2rem; }
+/* Responsif untuk layar sangat kecil */
+@media (max-width: 360px) {
     .btn-grid { grid-template-columns: 1fr; }
 }
