@@ -1,3 +1,4 @@
+/* --- RESET & BASE STYLES --- */
 * {
     margin: 0;
     padding: 0;
@@ -20,6 +21,7 @@ body {
     max-width: 450px;
 }
 
+/* --- HEADER --- */
 .header {
     text-align: center;
     margin-bottom: 2.5rem;
@@ -27,19 +29,19 @@ body {
 
 .header h1 {
     font-weight: 800;
-    font-size: 1.8rem; /* Sedikit dikecilkan agar muat satu baris di mobile */
+    font-size: 1.8rem;
     letter-spacing: -0.5px;
-    white-space: nowrap; /* Memaksa teks tetap satu baris */
+    white-space: nowrap;
     display: flex;
     justify-content: center;
-    gap: 8px; /* Jarak antara kata AUGMENTED dan REALITY */
+    gap: 8px;
 }
 
 .header h1 span {
     background: linear-gradient(90deg, #00d2ff, #3a7bd5);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    display: inline; /* Menghapus block agar tidak pindah baris */
+    display: inline;
 }
 
 .header p {
@@ -48,7 +50,7 @@ body {
     margin-top: 5px;
 }
 
-/* TOMBOL UTAMA (1) */
+/* --- TOMBOL UTAMA (1) --- */
 .btn-main {
     width: 100%;
     background: linear-gradient(135deg, #0061ff 0%, #60efff 100%);
@@ -61,30 +63,27 @@ body {
     overflow: hidden;
     display: flex;
     align-items: center;
-    justify-content: center; /* Center teks */
-    margin-bottom: 3rem; 
+    justify-content: center;
+    margin-bottom: 3.5rem; 
     transition: 0.3s;
     box-shadow: 0 12px 24px rgba(0, 97, 255, 0.2);
 }
 
-/* GARIS PEMISAH (DIVIDER) */
 .btn-main::after {
     content: "";
     position: absolute;
-    bottom: -1.5rem; /* Posisi tepat di tengah antara tombol 1 dan grid */
+    bottom: -1.75rem;
     left: 50%;
     transform: translateX(-50%);
-    width: 100%; /* Lebar garis */
+    width: 100%;
     height: 1px;
-    /* Efek gradasi agar garis terlihat memudar di ujung (estetik) */
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
 }
 
-/* Optional: Menambah teks kecil di tengah garis jika ingin */
 .btn-main::before {
     content: "MENU LAINNYA";
     position: absolute;
-    bottom: -1.85rem;
+    bottom: -2.1rem;
     left: 50%;
     transform: translateX(-50%);
     background: #0d0d18; 
@@ -95,24 +94,11 @@ body {
     z-index: 2;
 }
 
-/* Efek saat tombol ditekan (Feedback Visual) */
-.btn-main:active, .btn-sub:active {
-    transform: scale(0.95);
-    filter: brightness(0.9);
-}
-
-/* Pastikan kursor berubah jadi tangan di desktop */
-button {
-    cursor: pointer;
-    border: none; /* Menghapus border default button */
-    outline: none;
-}
-
 .icon-main {
     position: absolute;
-    left: 15px; /* Pojok kiri */
+    left: 15px;
     font-size: 3rem;
-    opacity: 1; /* Tidak transparan */
+    opacity: 1;
 }
 
 .btn-text-main {
@@ -132,7 +118,7 @@ button {
     opacity: 0.8;
 }
 
-/* GRID TOMBOL (2-7) */
+/* --- GRID TOMBOL --- */
 .btn-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -150,24 +136,23 @@ button {
     overflow: hidden;
     display: flex;
     align-items: center;
-    justify-content: center; /* Center teks */
+    justify-content: center;
     min-height: 100px;
     transition: 0.3s;
 }
 
-/* Icon Pojok Kiri Transparan 40% */
 .icon-small {
     position: absolute;
     left: -10px;
     top: -5px;
     font-size: 4rem;
-    opacity: 0.4; /* Transparan 40% */
+    opacity: 0.4;
     transform: rotate(-15deg);
     pointer-events: none;
 }
 
 .btn-content {
-    text-align: center; /* Teks center */
+    text-align: center;
     z-index: 1;
 }
 
@@ -181,8 +166,20 @@ button {
     display: block;
     font-size: 0.75rem;
     font-style: italic;
-    color: #00d2ff; /* Warna berbeda untuk membedakan bahasa */
+    color: #00d2ff;
     margin-top: 2px;
+}
+
+/* --- INTERAKSI --- */
+button {
+    cursor: pointer;
+    border: none;
+    outline: none;
+}
+
+.btn-main:active, .btn-sub:active {
+    transform: scale(0.95);
+    filter: brightness(0.9);
 }
 
 .btn-sub:hover {
@@ -191,5 +188,80 @@ button {
     border-color: #00d2ff;
 }
 
+/* --- STATISTIK RATING (DARI SUPABASE) --- */
+.rating-stats {
+    margin-top: 3rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: center;
+    backdrop-filter: blur(10px);
+    animation: fadeInUp 0.8s ease forwards;
+}
 
+.rating-score {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
 
+.score-value {
+    font-size: 2.8rem;
+    font-weight: 800;
+    line-height: 1;
+    background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.3));
+}
+
+.stars-static {
+    position: relative;
+    display: inline-block;
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.1);
+    letter-spacing: 4px;
+    margin: 8px 0;
+}
+
+.stars-active {
+    position: absolute;
+    top: 0;
+    left: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    color: #ffdf00;
+    text-shadow: 0 0 15px rgba(255, 223, 0, 0.5);
+    transition: width 1.5s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+}
+
+.total-reviews {
+    font-size: 0.7rem;
+    color: #6a6a8e;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+/* --- ANIMASI --- */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 380px) {
+    .header h1 { font-size: 1.5rem; }
+    .score-value { font-size: 2.2rem; }
+    .stars-static { font-size: 1.2rem; }
+    .rating-stats { padding: 1rem; }
+}
